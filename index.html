@@ -133,6 +133,22 @@
             outline: none;
             border-color: #5a67d8;
         }
+        
+        /* Style for the new image URL input */
+        .form-group input.question-image-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input.question-image-input:focus {
+            outline: none;
+            border-color: #5a67d8;
+        }
+
 
         .question-block {
             background: #f8fafc;
@@ -206,6 +222,15 @@
             font-size: 1.8rem;
             margin-bottom: 30px;
             color: #333;
+        }
+
+        .question-text img { /* Styling for question images */
+            max-width: 100%;
+            height: auto;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         .options-grid {
@@ -513,6 +538,11 @@
                     <p>Visualiza los resultados de los jugadores en tiempo real y gestiona quizzes</p>
                     <button class="btn">Acceder al Panel</button>
                 </div>
+                <div class="menu-card" onclick="window.location.href='roulette.html'">
+                    <h3>🎡 Ruleta Aleatoria</h3>
+                    <p>Selecciona un nombre al azar entre los jugadores de tus quizzes.</p>
+                    <button class="btn">Girar Ruleta</button>
+                </div>
             </div>
         </div>
 
@@ -621,7 +651,12 @@
                     <div id="admin-results-table-container">
                         <p>Esperando datos de jugadores...</p>
                     </div>
-                    <button class="btn" onclick="stopRealtimeUpdates()" style="background: #e53e3e; margin-top: 20px;">Detener Monitoreo</button>
+                    <button class="btn" id="download-results-btn" style="background: #28a745; margin-top: 20px; margin-right: 10px;">
+                        Descargar Resultados (CSV)
+                    </button>
+                    <button class="btn" onclick="stopRealtimeUpdates()" style="background: #e53e3e; margin-top: 20px;">
+                        Detener Monitoreo
+                    </button>
                 </div>
             </div>
         </div>
@@ -753,6 +788,11 @@
                 </div>
                 
                 <div class="form-group">
+                    <label>URL de Imagen (Opcional)</label>
+                    <input type="text" class="question-image-input" placeholder="Pega la URL de una imagen aquí (ej: https://ejemplo.com/imagen.jpg)">
+                </div>
+
+                <div class="form-group">
                     <label>Opciones de respuesta</label>
                     <div class="option-input">
                         <input type="text" class="option-text-input" placeholder="Opción A">
@@ -819,6 +859,7 @@
             
             questionBlocks.forEach((block, index) => {
                 const questionText = block.querySelector('.question-text-input').value.trim(); 
+                const questionImage = block.querySelector('.question-image-input').value.trim(); // Get image URL
                 const optionInputs = block.querySelectorAll('.option-text-input'); 
                 const options = Array.from(optionInputs).map(input => input.value.trim());
                 const correctAnswerInput = block.querySelector(`input[name="correct-${index}"]:checked`);
@@ -843,6 +884,7 @@
                 
                 questions.push({
                     question: questionText,
+                    image: questionImage, // Include the image URL
                     options: options,
                     correctAnswer: parseInt(correctAnswerInput.value)
                 });
@@ -1014,10 +1056,26 @@
             }
 
             const question = window.currentQuiz.questions[window.currentQuestionIndex];
+            const questionTextElement = document.getElementById('current-question');
+            
+            questionTextElement.textContent = question.question; // Set the question text
+
+            // Clear any previous image
+            const existingImage = questionTextElement.querySelector('img');
+            if (existingImage) {
+                existingImage.remove();
+            }
+
+            // Add image if available
+            if (question.image) {
+                const questionImageElement = document.createElement('img');
+                questionImageElement.src = question.image;
+                questionImageElement.alt = "Imagen de la pregunta";
+                questionTextElement.appendChild(questionImageElement);
+            }
             
             document.getElementById('question-number').textContent = 
                 `Pregunta ${window.currentQuestionIndex + 1} de ${window.currentQuiz.questions.length}`;
-            document.getElementById('current-question').textContent = question.question;
             
             const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
@@ -1348,7 +1406,8 @@
                 } else {
                     adminQuizList.innerHTML = '<p>No hay quizzes para administrar.</p>';
                 }
-            } catch (error) {
+            }
+            catch (error) {
                 console.error('Error al cargar quizzes para admin:', error);
                 adminQuizList.innerHTML = '<p>Error al cargar la lista de quizzes para el panel de administración.</p>';
             }
@@ -1363,6 +1422,10 @@
             const resultsContainer = document.getElementById('admin-results-table-container');
             resultsContainer.innerHTML = '<p>Cargando resultados en tiempo real...</p>';
 
+            // Set up the download button's click handler
+            const downloadBtn = document.getElementById('download-results-btn');
+            downloadBtn.onclick = () => downloadAdminResultsCSV(quizId, quizTitle);
+            
             const playersRef = ref(database, `sessions/${quizId}/players`); // Ahora escucha en 'sessions'
             window.realtimeListenerRef = playersRef; 
 
@@ -1435,6 +1498,8 @@
             }
             document.getElementById('admin-realtime-results').classList.add('hidden');
             document.getElementById('admin-results-table-container').innerHTML = ''; 
+            // Clear the download button's click handler when monitoring stops
+            document.getElementById('download-results-btn').onclick = null;
         };
 
         // **NUEVO: Función para eliminar un quiz**
@@ -1452,6 +1517,87 @@
                     console.error('Error al eliminar el quiz:', error);
                     alert('Error al eliminar el quiz: ' + error.message);
                 }
+            }
+        };
+
+        // Helper function to escape CSV fields
+        function escapeCsvField(field) {
+            if (field === null || field === undefined) {
+                return '""'; // Represent null/undefined as empty string in CSV
+            }
+            // Convert to string, replace all double quotes with two double quotes, then wrap in double quotes
+            let stringField = String(field);
+            return `"${stringField.replace(/"/g, '""')}"`;
+        }
+
+        // NEW FUNCTION TO DOWNLOAD RESULTS AS CSV (IMPROVED FOR EXCEL)
+        window.downloadAdminResultsCSV = async function(quizId, quizTitle) {
+            try {
+                const sessionsRef = ref(database, `sessions/${quizId}/players`);
+                const snapshot = await get(sessionsRef);
+
+                if (!snapshot.exists()) {
+                    alert('No hay datos de jugadores para descargar para este quiz.');
+                    return;
+                }
+
+                const players = snapshot.val();
+                const processedPlayers = {};
+                Object.values(players).forEach(player => {
+                    if (player.name) { // Ensure player has a name
+                        if (!processedPlayers[player.name] || 
+                            (player.score > (processedPlayers[player.name].score || 0)) ||
+                            (player.score === (processedPlayers[player.name].score || 0) && new Date(player.timestamp || player.lastAnswerTime) > new Date(processedPlayers[player.name].timestamp || processedPlayers[player.name].lastAnswerTime))
+                        ) {
+                            processedPlayers[player.name] = player;
+                        }
+                    }
+                });
+
+                const sortedPlayers = Object.values(processedPlayers).sort((a, b) => b.score - a.score);
+
+                // Add BOM for UTF-8 compatibility in Excel
+                const BOM = "\ufeff"; 
+                let csvContent = BOM;
+                csvContent += "Posición,Nombre,Puntuación,Total Preguntas,Estado,Última Actividad (Fecha),Última Actividad (Hora)\n";
+
+                sortedPlayers.forEach((player, index) => {
+                    const status = player.isFinished ? 'Completado' : 'Jugando';
+                    const lastActivityDateObj = player.timestamp ? new Date(player.timestamp) : (player.lastAnswerTime ? new Date(player.lastAnswerTime) : null);
+                    const datePart = lastActivityDateObj ? lastActivityDateObj.toLocaleDateString() : 'N/A';
+                    const timePart = lastActivityDateObj ? lastActivityDateObj.toLocaleTimeString() : 'N/A';
+                    
+                    csvContent += [
+                        escapeCsvField(index + 1),
+                        escapeCsvField(player.name),
+                        escapeCsvField(player.score !== undefined ? player.score : 'N/A'),
+                        escapeCsvField(player.totalQuestions !== undefined ? player.totalQuestions : 'N/A'),
+                        escapeCsvField(status),
+                        escapeCsvField(datePart),
+                        escapeCsvField(timePart)
+                    ].join(',') + '\n';
+                });
+
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                if (link.download !== undefined) { 
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `${quizTitle}_resultados.csv`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                } else {
+                    // Fallback for browsers that don't support the download attribute
+                    window.open('data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+                }
+                alert('¡Resultados descargados exitosamente en formato CSV!');
+
+            } catch (error) {
+                console.error('Error al descargar los resultados:', error);
+                alert('Error al descargar los resultados: ' + error.message);
             }
         };
 
