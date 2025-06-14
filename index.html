@@ -1,1643 +1,228 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuizPlatform - Cuestionarios Interactivos</title>
-    <style>
-        /* Estilos CSS Base */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+                <!-- Orejas -->
+                <circle cx="60" cy="60" r="15" fill="#8B4513"/>
+                <circle cx="140" cy="60" r="15" fill="#8B4513"/>
+                <circle cx="60" cy="60" r="10" fill="#DEB887"/>
+                <circle cx="140" cy="60" r="10" fill="#DEB887"/>
 
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
+                <!-- Grupo de ojos -->
+                <g id="eyes">
+                    <!-- Blancos de los ojos -->
+                    <circle cx="85" cy="75" r="8" fill="white"/>
+                    <circle cx="115" cy="75" r="8" fill="white"/>
+                    <!-- Pupilas -->
+                    <g id="pupils">
+                        <circle cx="85" cy="75" r="4" fill="black"/>
+                        <circle cx="115" cy="75" r="4" fill="black"/>
+                    </g>
+                </g>
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
+                <!-- Nariz -->
+                <ellipse cx="100" cy="90" rx="8" ry="6" fill="#4A2500"/>
 
-        .header {
-            text-align: center;
-            margin-bottom: 40px;
-            color: white;
-        }
+                <!-- Boca -->
+                <path d="M90 100 Q100 105 110 100" stroke="#4A2500" stroke-width="2" fill="none"/>
 
-        .header h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-        }
+                <!-- Brazos normales -->
+                <g id="arms-rest">
+                    <path d="M65 115 Q60 130 70 150" stroke="#8B4513" stroke-width="12" fill="none"/>
+                    <path d="M135 115 Q140 130 130 150" stroke="#8B4513" stroke-width="12" fill="none"/>
+                </g>
 
-        .header p {
-            font-size: 1.2rem;
-            opacity: 0.9;
-        }
-
-        .main-menu {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .menu-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px 30px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-        }
-
-        .menu-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-        }
-
-        .menu-card h3 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            color: #5a67d8;
-        }
-
-        .menu-card p {
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .quiz-creation {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .quiz-creation h2 {
-            color: #5a67d8;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .form-group input:not([type="radio"]), .form-group textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group input:not([type="radio"]):focus, .form-group textarea:focus {
-            outline: none;
-            border-color: #5a67d8;
-        }
-        
-        /* Style for the new image URL input */
-        .form-group input.question-image-input {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-group input.question-image-input:focus {
-            outline: none;
-            border-color: #5a67d8;
-        }
-
-
-        .question-block {
-            background: #f8fafc;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 20px;
-            border-left: 4px solid #5a67d8;
-        }
-
-        .question-block .form-group { 
-            margin-bottom: 15px;
-        }
-        .question-block .form-group:last-of-type {
-            margin-bottom: 0;
-        }
-
-        .option-input {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .option-input input[type="text"] { 
-            flex: 1;
-            margin-right: 10px;
-            padding: 8px 12px;
-            border: 1px solid #cbd5e0;
-            border-radius: 8px;
-        }
-
-        .option-input input[type="text"]:focus {
-            border-color: #5a67d8;
-        }
-
-        .option-input input[type="radio"] {
-            margin-left: 5px;
-            transform: scale(1.1);
-            cursor: pointer;
-            accent-color: #5a67d8;
-        }
-
-        .option-input label {
-            margin-left: 5px;
-            font-size: 0.9rem;
-            color: #666;
-            cursor: pointer;
-            margin-bottom: 0;
-        }
-
-        .quiz-player {
-            text-align: center;
-        }
-
-        .question-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            max-width: 800px;
-            margin: 0 auto;
-            position: relative; 
-        }
-
-        .question-number {
-            color: #5a67d8;
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-        }
-
-        .question-text {
-            font-size: 1.8rem;
-            margin-bottom: 30px;
-            color: #333;
-        }
-
-        .question-text img { /* Styling for question images */
-            max-width: 100%;
-            height: auto;
-            margin-top: 15px;
-            margin-bottom: 20px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .options-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .option-btn {
-            background: #f8fafc;
-            border: 2px solid #e2e8f0;
-            border-radius: 15px;
-            padding: 20px;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .option-btn:hover {
-            background: #e2e8f0;
-            transform: scale(1.02);
-        }
-
-        .option-btn.selected {
-            background: #5a67d8;
-            color: white;
-            border-color: #5a67d8;
-        }
-
-        .option-btn.correct {
-            background: #48bb78;
-            border-color: #48bb78;
-            color: white;
-        }
-
-        .option-btn.incorrect {
-            background: #f56565;
-            border-color: #f56565;
-            color: white;
-        }
-
-        .timer {
-            font-size: 2rem;
-            font-weight: bold;
-            color: #e53e3e;
-            margin-bottom: 20px;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e2e8f0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            transition: width 0.3s ease;
-        }
-
-        .results {
-            text-align: center;
-        }
-
-        .score-display {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #5a67d8;
-            margin-bottom: 20px;
-        }
-
-        .quiz-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .quiz-item {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .quiz-item:hover {
-            transform: translateY(-5px);
-        }
-
-        .quiz-title {
-            font-size: 1.3rem;
-            color: #5a67d8;
-            margin-bottom: 10px;
-        }
-
-        .quiz-meta {
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-        }
-
-        .back-btn {
-            background: #718096;
-            margin-bottom: 20px;
-        }
-
-        .celebration {
-            animation: bounce 0.6s infinite alternate;
-        }
-
-        @keyframes bounce {
-            from { transform: translateY(0px); }
-            to { transform: translateY(-20px); }
-        }
-
-        .loading {
-            display: inline-block;
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #5a67d8;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 768px) {
-            .options-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .header h1 {
-                font-size: 2rem;
-            }
-            
-            .container {
-                padding: 10px;
-            }
-        }
-
-        /* Estilos para la tabla de resultados de jugadores */
-        .player-results-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 30px;
-        }
-
-        .player-results-table th, .player-results-table td {
-            border: 1px solid #e2e8f0;
-            padding: 12px;
-            text-align: left;
-        }
-
-        .player-results-table th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-            color: #5a67d8;
-        }
-
-        .player-results-table tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-
-        .player-results-table tr:hover {
-            background-color: #edf2f7;
-        }
-
-        /* **MEJORADO: Ganador en la tabla de resultados** */
-        .player-results-table tr.winner {
-            background-color: #e0ffe0; /* Un verde muy claro */
-            font-weight: bold;
-            color: #28a745;
-            box-shadow: 0 0 10px rgba(40, 167, 69, 0.3);
-            position: relative;
-        }
-        .player-results-table tr.winner td {
-            border-color: #28a745;
-        }
-        .player-results-table tr.winner td:first-child::before {
-            content: '👑 ';
-            margin-right: 5px;
-            color: gold;
-            font-size: 1.2em;
-        }
-        
-        /* **MEJORADO: Mensajes de retroalimentación en el Quiz Player** */
-        #feedback-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.8); /* Inicia más pequeño */
-            background-color: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 20px 30px;
-            border-radius: 15px;
-            font-size: 2em;
-            font-weight: bold;
-            text-align: center;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
-            pointer-events: none; /* Permite clics a través del elemento cuando no está visible */
-        }
-        #feedback-message.show {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1); /* Crece al mostrarse */
-        }
-        #feedback-message.correct {
-            background-color: rgba(72, 187, 120, 0.95); /* Verde vibrante */
-            box-shadow: 0 0 20px rgba(72, 187, 120, 0.6);
-        }
-        #feedback-message.incorrect {
-            background-color: rgba(245, 101, 101, 0.95); /* Rojo vibrante */
-            box-shadow: 0 0 20px rgba(245, 101, 101, 0.6);
-        }
-
-        /* **MEJORADO: Estilos para el panel de administración** */
-        .admin-quiz-item {
-            background: #f0f8ff; /* Azul muy claro */
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            border-left: 6px solid #5a67d8; /* Borde de color */
-        }
-        .admin-quiz-item h3 {
-            color: #5a67d8;
-            margin-bottom: 5px;
-            font-size: 1.4rem;
-        }
-        .admin-quiz-item p {
-            color: #666;
-            font-size: 0.9rem;
-        }
-        .admin-quiz-item .btn {
-            margin-left: 10px;
-            padding: 10px 20px;
-            font-size: 0.9rem;
-        }
-        .admin-quiz-item .btn-delete {
-            background: #dc3545; /* Rojo para eliminar */
-        }
-        .admin-quiz-item .btn-delete:hover {
-            background: #c82333;
-        }
-
-        #admin-realtime-results {
-            background: #ffffff;
-            border-radius: 20px;
-            padding: 30px;
-            margin-top: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            border: 1px solid #e2e8f0;
-        }
-
-        #admin-realtime-results h3 {
-            color: #5a67d8;
-            margin-bottom: 20px;
-            font-size: 1.8rem;
-            text-align: center;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div id="main-screen">
-            <div class="header">
-                <h1>🎯 QuizPlatform</h1>
-                <p>Crea y juega cuestionarios interactivos</p>
-            </div>
-            
-            <div class="main-menu">
-                <div class="menu-card" onclick="showCreateQuiz()">
-                    <h3>📝 Crear Quiz</h3>
-                    <p>Diseña tu propio cuestionario con preguntas personalizadas</p>
-                    <button class="btn">Empezar a crear</button>
-                </div>
-                
-                <div class="menu-card" onclick="showQuizList()">
-                    <h3>🎮 Jugar Quiz</h3>
-                    <p>Elige un cuestionario existente y pon a prueba tus conocimientos</p>
-                    <button class="btn">Ver cuestionarios</button>
-                </div>
-                
-                <div class="menu-card" onclick="window.location.href='join_quiz.html'">
-                    <h3>🔗 Unirme con código</h3>
-                    <p>Únete a un quiz usando un código de sala</p>
-                    <button class="btn">Ingresar código</button>
-                </div>
-                <div class="menu-card" onclick="showAdminDashboard()">
-                    <h3>📊 Panel de Administración</h3>
-                    <p>Visualiza los resultados de los jugadores en tiempo real y gestiona quizzes</p>
-                    <button class="btn">Acceder al Panel</button>
-                </div>
-                <div class="menu-card" onclick="window.location.href='roulette.html'">
-                    <h3>🎡 Ruleta Aleatoria</h3>
-                    <p>Selecciona un nombre al azar entre los jugadores de tus quizzes.</p>
-                    <button class="btn">Girar Ruleta</button>
-                </div>
-            </div>
+                <!-- Manos tapando ojos (inicialmente ocultas) -->
+                <g id="hands" opacity="0">
+                    <path d="M65 115 Q85 95 85 75" stroke="#8B4513" stroke-width="12" fill="none"/>
+                    <path d="M135 115 Q115 95 115 75" stroke="#8B4513" stroke-width="12" fill="none"/>
+                    <circle cx="85" cy="75" r="10" fill="#DEB887"/>
+                    <circle cx="115" cy="75" r="10" fill="#DEB887"/>
+                </g>
+            </svg>
         </div>
-
-        <div id="create-quiz-screen" class="hidden">
-            <button class="btn back-btn" onclick="showMainScreen()">← Volver</button>
-            
-            <div class="quiz-creation">
-                <h2>Crear Nuevo Cuestionario</h2>
-                
-                <div class="form-group">
-                    <label for="quiz-title">Título del Quiz</label>
-                    <input type="text" id="quiz-title" placeholder="Ej: Historia de Colombia">
-                </div>
-                
-                <div class="form-group">
-                    <label for="quiz-description">Descripción</label>
-                    <textarea id="quiz-description" placeholder="Describe de qué trata tu cuestionario..." rows="3"></textarea>
-                </div>
-                
-                <div id="questions-container">
-                    </div>
-                
-                <button class="btn" onclick="addQuestion()">+ Agregar Pregunta</button>
-                <button class="btn" onclick="saveQuiz()" style="margin-left: 10px;">💾 Guardar Quiz</button>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Usuario</label>
+                <i class="fas fa-user"></i>
+                <input type="text" id="username" placeholder="Ingrese su usuario" required>
             </div>
-        </div>
-
-        <div id="quiz-list-screen" class="hidden">
-            <button class="btn back-btn" onclick="showMainScreen()">← Volver</button>
-            
-            <div class="quiz-creation">
-                <h2>Cuestionarios Disponibles</h2>
-                <div id="quiz-list" class="quiz-list">
-                    <div class="loading"></div>
-                </div>
+            <!-- The key change is in the HTML for the password input group -->
+            <div class="form-group">
+                <label for="password">Contraseña</label>
+                <i class="fas fa-lock"></i>
+                <input type="password" id="password" placeholder="Ingrese su contraseña" required>
+                <span class="password-toggle" onclick="togglePasswordVisibility()">
+                        <i class="fas fa-eye-slash" id="passwordToggleIcon"></i>
+                    </span>
             </div>
-        </div>
-
-        <div id="start-quiz-pre-player-screen" class="hidden">
-            <button class="btn back-btn" onclick="showQuizList()">← Volver a Quizzes</button>
-            <div class="quiz-creation">
-                <h2 id="pre-player-quiz-title"></h2>
-                <p>Ingresa tu nombre para comenzar:</p>
-                <div class="form-group">
-                    <label for="player-name-start">Tu Nombre</label>
-                    <input type="text" id="player-name-start" placeholder="Tu nombre para el quiz">
-                </div>
-                <button class="btn" id="confirm-start-quiz-btn" onclick="confirmStartQuiz()">Comenzar Quiz</button>
+            <div class="remember-me">
+                <input type="checkbox" id="rememberMe">
+                <label for="rememberMe">Mantener sesión iniciada</label>
             </div>
-        </div>
-
-        <div id="quiz-player-screen" class="hidden">
-            <div class="quiz-player">
-                <div class="question-card">
-                    <div class="timer" id="timer">30</div>
-                    
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill"></div>
-                    </div>
-                    
-                    <div class="question-number" id="question-number">Pregunta 1 de 5</div>
-                    <div class="question-text" id="current-question">¿Cuál es la capital de Colombia?</div>
-                    
-                    <div class="options-grid" id="options-container">
-                        </div>
-                    
-                    <button class="btn" id="next-btn" onclick="nextQuestion()" style="display: none;">Siguiente Pregunta</button>
-                    <div id="feedback-message" class="hidden"></div>
-                </div>
-            </div>
-        </div>
-
-        <div id="results-screen" class="hidden">
-            <div class="quiz-creation results">
-                <h2>🎉 ¡Quiz Completado!</h2>
-                <p>Jugador: <span id="player-name-display"></span></p>
-                <div class="score-display celebration" id="final-score">8/10</div>
-                <p id="score-message">¡Excelente trabajo!</p>
-                <button class="btn" onclick="showMainScreen()">🏠 Volver al Inicio</button>
-                <button class="btn" onclick="playAgain()" style="margin-left: 10px;">🔄 Jugar de Nuevo</button>
-            </div>
-        </div>
-
-        <div id="quiz-player-results-screen" class="hidden">
-            <button class="btn back-btn" onclick="showQuizList()">← Volver a Quizzes</button>
-            <div class="quiz-creation">
-                <h2 id="quiz-results-title">Resultados de Jugadores: </h2>
-                <div id="player-results-container">
-                    <p>Cargando resultados...</p>
-                </div>
-            </div>
-        </div>
-
-        <div id="admin-dashboard-screen" class="hidden">
-            <button class="btn back-btn" onclick="showMainScreen()">← Volver</button>
-            <div class="quiz-creation">
-                <h2>📊 Panel de Administración</h2>
-                <p>Gestiona tus quizzes y visualiza resultados en tiempo real.</p>
-                <div id="admin-quiz-list">
-                    <div class="loading"></div>
-                </div>
-                
-                <div id="admin-realtime-results" class="hidden" style="margin-top: 30px;">
-                    <hr style="margin-bottom: 20px;">
-                    <h3 id="admin-results-quiz-title">Resultados en Vivo para: </h3>
-                    <div id="admin-results-table-container">
-                        <p>Esperando datos de jugadores...</p>
-                    </div>
-                    <button class="btn" id="download-results-btn" style="background: #28a745; margin-top: 20px; margin-right: 10px;">
-                        Descargar Resultados (CSV)
-                    </button>
-                    <button class="btn" onclick="stopRealtimeUpdates()" style="background: #e53e3e; margin-top: 20px;">
-                        Detener Monitoreo
-                    </button>
-                </div>
-            </div>
-        </div>
+            <button type="submit" class="submit-btn">Iniciar Sesión</button>
+        </form>
+        <div id="message"></div>
     </div>
+</div>
+<div class="copyright">
+    © 2024 Desarrollado por Alex Rendon - Merchandising Express. Todos los derechos reservados.
+</div>
 
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
-        import { getDatabase, ref, push, set, get, onValue, off, remove, update } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js';
 
-         const firebaseConfig = {
-            apiKey: "AIzaSyAC3xy73lOmUxyN0HaNueTtaI_cmoIL4sY",
-            authDomain: "cuestionario-5855f.firebaseapp.com",
-            databaseURL: "https://cuestionario-5855f-default-rtdb.firebaseio.com",
-            projectId: "cuestionario-5855f",
-            storageBucket: "cuestionario-5855f.firebasestorage.app",
-            messagingSenderId: "19596515431",
-            appId: "1:19596515431:web:058e9e58436d2403be1cc2",
-            measurementId: "G-81R4G7YSFD"
-        };
 
-        
-        const app = initializeApp(firebaseConfig);
-        const database = getDatabase(app);
 
-        // Variables globales
-        window.database = database;
-        window.currentQuiz = null;
-        window.currentQuizId = null;
-        window.currentQuestionIndex = 0;
-        window.score = 0;
-        window.timer = null;
-        window.timeLeft = 30;
-        window.playerAnswers = [];
-        window.questionCounter = 0; 
-        window.playerName = ''; 
-        window.realtimeListenerRef = null; 
-        window.currentPlayerId = null; // Variable para el ID de la sesión del jugador actual
-        
-        // Funciones para mostrar/ocultar pantallas
-        window.showMainScreen = function() {
-            hideAllScreens();
-            stopRealtimeUpdates(); 
-            document.getElementById('main-screen').classList.remove('hidden');
-            // Limpiar parámetros de URL al volver a la pantalla principal
-            if (window.history.replaceState) {
-                const url = new URL(window.location.href);
-                url.search = '';
-                window.history.replaceState({path: url.href}, '', url.href);
-            }
-            // Limpiar datos de localStorage relacionados con el juego actual
-            localStorage.removeItem('currentQuizId');
-            localStorage.removeItem('currentQuiz');
-            localStorage.removeItem('currentPlayerId');
-            localStorage.removeItem('currentPlayerName');
-            // Resetear variables globales del jugador
-            window.currentQuiz = null;
-            window.currentQuizId = null;
-            window.currentQuestionIndex = 0;
-            window.score = 0;
-            window.playerName = ''; 
-            window.currentPlayerId = null; 
-        };
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyBC5M5R5XMx-OU_8Ra_6yaVJO1DKDLu9aY",
+        authDomain: "app-sofia-4ceeb.firebaseapp.com",
+        databaseURL: "https://app-sofia-4ceeb-default-rtdb.firebaseio.com",
+        projectId: "app-sofia-4ceeb",
+        storageBucket: "app-sofia-4ceeb.appspot.com",
+        messagingSenderId: "600003650471",
+        appId: "1:600003650471:web:8bc2ea2892c04119080c82",
+        measurementId: "G-NH08X2MFD9"
+    };
 
-        window.showCreateQuiz = function() {
-            hideAllScreens();
-            stopRealtimeUpdates();
-            document.getElementById('create-quiz-screen').classList.remove('hidden');
-            if (document.getElementById('questions-container').children.length === 0) {
-                addQuestion();
-            }
-        };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        window.showQuizList = function() {
-            hideAllScreens();
-            stopRealtimeUpdates();
-            document.getElementById('quiz-list-screen').classList.remove('hidden');
-            loadQuizList();
-        };
-        
-        window.showStartQuizPrePlayer = function(quizId, quizTitle) {
-            hideAllScreens();
-            stopRealtimeUpdates();
-            document.getElementById('start-quiz-pre-player-screen').classList.remove('hidden');
-            document.getElementById('pre-player-quiz-title').textContent = `Comenzar Quiz: ${quizTitle}`;
-            document.getElementById('confirm-start-quiz-btn').onclick = () => confirmStartQuiz(quizId);
-            document.getElementById('player-name-start').value = ''; // Limpiar el campo de nombre
-        };
+    function showMessage(text, show = true) {
+        const messageElement = document.getElementById('message');
+        messageElement.textContent = text;
+        messageElement.style.display = show ? 'block' : 'none';
+    }
 
-        window.showQuizPlayerResults = function(quizId, quizTitle) {
-            hideAllScreens();
-            stopRealtimeUpdates();
-            document.getElementById('quiz-player-results-screen').classList.remove('hidden');
-            document.getElementById('quiz-results-title').textContent = `Resultados de Jugadores: ${quizTitle}`;
-            loadPlayerResults(quizId);
-        };
+    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
 
-        window.showAdminDashboard = function() {
-            hideAllScreens();
-            stopRealtimeUpdates(); 
-            document.getElementById('admin-dashboard-screen').classList.remove('hidden');
-            loadAdminQuizList();
-        };
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const rememberMe = document.getElementById('rememberMe').checked;
 
-        // Nueva función para mostrar la pantalla del jugador (llamada desde join_quiz.html o direct play)
-        window.showQuizPlayer = function() {
-            hideAllScreens();
-            document.getElementById('quiz-player-screen').classList.remove('hidden');
-            showQuestion(); // Asume que currentQuiz, currentQuizId, currentPlayerId, currentPlayerName ya están cargados
-        };
+        try {
+            const credentialsRef = db.ref('user_credentials');
+            const snapshot = await credentialsRef.once('value');
+            let found = false;
 
-        function hideAllScreens() {
-            const screens = ['main-screen', 'create-quiz-screen', 'quiz-list-screen', 'start-quiz-pre-player-screen', 'quiz-player-screen', 'results-screen', 'quiz-player-results-screen', 'admin-dashboard-screen'];
-            screens.forEach(screen => {
-                document.getElementById(screen).classList.add('hidden');
-            });
-        }
-
-        // Funciones para la creación de Quizzes
-        window.addQuestion = function() {
-            const container = document.getElementById('questions-container');
-            const newQuestionIndex = window.questionCounter;
-            const questionBlock = document.createElement('div');
-            questionBlock.className = 'question-block';
-            questionBlock.innerHTML = `
-                <h3>Pregunta ${newQuestionIndex + 1}</h3>
-                <div class="form-group">
-                    <label>Pregunta</label>
-                    <input type="text" class="question-text-input" placeholder="Escribe tu pregunta aquí...">
-                </div>
-                
-                <div class="form-group">
-                    <label>URL de Imagen (Opcional)</label>
-                    <input type="text" class="question-image-input" placeholder="Pega la URL de una imagen aquí (ej: https://ejemplo.com/imagen.jpg)">
-                </div>
-
-                <div class="form-group">
-                    <label>Opciones de respuesta</label>
-                    <div class="option-input">
-                        <input type="text" class="option-text-input" placeholder="Opción A">
-                        <input type="radio" name="correct-${newQuestionIndex}" value="0" id="correct-${newQuestionIndex}-0">
-                        <label for="correct-${newQuestionIndex}-0">Correcta</label>
-                    </div>
-                    <div class="option-input">
-                        <input type="text" class="option-text-input" placeholder="Opción B">
-                        <input type="radio" name="correct-${newQuestionIndex}" value="1" id="correct-${newQuestionIndex}-1">
-                        <label for="correct-${newQuestionIndex}-1">Correcta</label>
-                    </div>
-                    <div class="option-input">
-                        <input type="text" class="option-text-input" placeholder="Opción C">
-                        <input type="radio" name="correct-${newQuestionIndex}" value="2" id="correct-${newQuestionIndex}-2">
-                        <label for="correct-${newQuestionIndex}-2">Correcta</label>
-                    </div>
-                    <div class="option-input">
-                        <input type="text" class="option-text-input" placeholder="Opción D">
-                        <input type="radio" name="correct-${newQuestionIndex}" value="3" id="correct-${newQuestionIndex}-3">
-                        <label for="correct-${newQuestionIndex}-3">Correcta</label>
-                    </div>
-                </div>
-                <button class="btn" onclick="removeQuestion(this)" style="background: #f56565;">Eliminar Pregunta</button>
-            `;
-            container.appendChild(questionBlock);
-            window.questionCounter++;
-        };
-
-        window.removeQuestion = function(button) {
-            button.parentElement.remove();
-            const questionBlocks = document.querySelectorAll('.question-block');
-            questionBlocks.forEach((block, index) => {
-                block.querySelector('h3').textContent = `Pregunta ${index + 1}`;
-                const radioInputs = block.querySelectorAll('input[type="radio"]');
-                radioInputs.forEach(radio => {
-                    radio.name = `correct-${index}`;
-                    radio.id = `correct-${index}-${radio.value}`;
-                });
-                block.querySelectorAll('label').forEach(label => {
-                    label.htmlFor = `correct-${index}-${label.htmlFor.split('-')[2]}`;
-                });
-            });
-            window.questionCounter--; 
-        };
-
-        window.saveQuiz = function() {
-            const title = document.getElementById('quiz-title').value.trim();
-            const description = document.getElementById('quiz-description').value.trim();
-            
-            if (!title) {
-                alert('Por favor ingresa un título para el quiz.');
-                return;
-            }
-
-            const questions = [];
-            const questionBlocks = document.querySelectorAll('#questions-container .question-block');
-            
-            if (questionBlocks.length === 0) {
-                alert('Por favor agrega al menos una pregunta.');
-                return;
-            }
-
-            let allQuestionsValid = true;
-            
-            questionBlocks.forEach((block, index) => {
-                const questionText = block.querySelector('.question-text-input').value.trim(); 
-                const questionImage = block.querySelector('.question-image-input').value.trim(); // Get image URL
-                const optionInputs = block.querySelectorAll('.option-text-input'); 
-                const options = Array.from(optionInputs).map(input => input.value.trim());
-                const correctAnswerInput = block.querySelector(`input[name="correct-${index}"]:checked`);
-                
-                if (!questionText) {
-                    alert(`La Pregunta ${index + 1} no tiene texto.`);
-                    allQuestionsValid = false;
-                    return; 
-                }
-
-                if (options.some(opt => !opt)) {
-                    alert(`La Pregunta ${index + 1} tiene opciones de respuesta vacías.`);
-                    allQuestionsValid = false;
-                    return;
-                }
-
-                if (!correctAnswerInput) {
-                    alert(`La Pregunta ${index + 1} no tiene una respuesta correcta seleccionada.`);
-                    allQuestionsValid = false;
-                    return;
-                }
-                
-                questions.push({
-                    question: questionText,
-                    image: questionImage, // Include the image URL
-                    options: options,
-                    correctAnswer: parseInt(correctAnswerInput.value)
-                });
-            });
-
-            if (!allQuestionsValid) {
-                return; 
-            }
-
-            const quizCode = generateQuizCode();
-            const quizData = {
-                title,
-                description,
-                questions,
-                code: quizCode,
-                createdAt: new Date().toISOString()
-            };
-
-            const quizzesRef = ref(database, 'quizzes');
-            const newQuizRef = push(quizzesRef);
-            
-            set(newQuizRef, quizData).then(() => {
-                alert(`¡Quiz guardado exitosamente! Comparte este código: ${quizCode}`);
-                showMainScreen();
-                document.getElementById('quiz-title').value = '';
-                document.getElementById('quiz-description').value = '';
-                document.getElementById('questions-container').innerHTML = '';
-                window.questionCounter = 0; 
-                addQuestion(); 
-            }).catch(error => {
-                console.error('Error al guardar:', error);
-                alert('Error al guardar el quiz: ' + error.message);
-            });
-        };
-
-        function generateQuizCode() {
-            return Math.random().toString(36).substr(2, 6).toUpperCase();
-        }
-
-        // Funciones para cargar y jugar Quizzes
-        async function loadQuizList() {
-            const quizList = document.getElementById('quiz-list');
-            quizList.innerHTML = '<div class="loading"></div>';
-            
-            try {
-                const quizzesRef = ref(database, 'quizzes');
-                const snapshot = await get(quizzesRef);
-                
-                if (snapshot.exists()) {
-                    const quizzes = snapshot.val();
-                    let html = '';
-                    
-                    Object.entries(quizzes).forEach(([id, quiz]) => {
-                        html += `
-                            <div class="quiz-item">
-                                <div class="quiz-title">${quiz.title}</div>
-                                <div class="quiz-meta">
-                                    ${quiz.questions.length} preguntas • Código: <strong>${quiz.code}</strong>
-                                </div>
-                                <p>${quiz.description}</p>
-                                <button class="btn" onclick="showStartQuizPrePlayer('${id}', '${quiz.title.replace(/'/g, "\\'")}')">▶️ Jugar</button>
-                                <button class="btn" onclick="shareQuizCode('${quiz.code}')" style="background: #4CAF50; margin-left: 10px;">Compartir Código</button>
-                                <button class="btn" onclick="showQuizPlayerResults('${id}', '${quiz.title.replace(/'/g, "\\'")}')" style="background: #007bff; margin-top: 10px;">Ver Resultados</button>
-                            </div>
-                        `;
-                    });
-                    
-                    quizList.innerHTML = html;
-                } else {
-                    quizList.innerHTML = '<p>No hay cuestionarios disponibles. ¡Crea el primero!</p>';
-                }
-            } catch (error) {
-                console.error('Error loading quizzes:', error);
-                quizList.innerHTML = '<p>Error al cargar los cuestionarios.</p>';
-            }
-        }
-
-        window.shareQuizCode = function(code) {
-            const shareText = `¡Ven y juega este quiz en QuizPlatform! Código: ${code}\nLink: ${window.location.href}`;
-            if (navigator.share) {
-                navigator.share({
-                    title: 'QuizPlatform - Juega un Quiz',
-                    text: shareText,
-                    url: window.location.href 
-                }).then(() => {
-                    console.log('Código de quiz compartido con éxito');
-                }).catch((error) => {
-                    console.error('Error al compartir:', error);
-                    alert(`Copia este código y compártelo: ${code}`); 
-                });
-            } else {
-                navigator.clipboard.writeText(code).then(() => {
-                    alert(`El código del quiz se ha copiado al portapapeles: ${code}\nComparte este link con el código.`);
-                }).catch(err => {
-                    console.error('Error al copiar el código:', err);
-                    alert(`Copia este código y compártelo: ${code}`);
-                });
-            }
-        };
-
-        window.confirmStartQuiz = async function(quizId) {
-            const playerNameInput = document.getElementById('player-name-start').value.trim();
-            if (!playerNameInput) {
-                alert('Por favor ingresa tu nombre para comenzar el quiz.');
-                return;
-            }
-            window.playerName = playerNameInput; 
-            
-            // Obtener el quiz para saber el total de preguntas
-            const quizRef = ref(database, `quizzes/${quizId}`);
-            const snapshot = await get(quizRef);
-            if (!snapshot.exists()) {
-                alert('El quiz no existe.');
-                return;
-            }
-            const quizData = snapshot.val();
-            const totalQuestions = quizData.questions.length;
-
-            // Iniciar sesión de juego para el jugador
-            const playersRef = ref(database, `sessions/${quizId}/players`);
-            const newPlayerEntryRef = push(playersRef);
-            window.currentPlayerId = newPlayerEntryRef.key; // Guarda el ID del jugador actual
-            
-            await set(newPlayerEntryRef, {
-                name: playerNameInput,
-                score: 0,
-                lastAnswerTime: Date.now(),
-                isFinished: false,
-                totalQuestions: totalQuestions // Guardar totalQuestions al inicio
-            });
-
-            await startQuiz(quizId);
-        };
-
-        window.startQuiz = async function(quizId) {
-            try {
-                const quizRef = ref(database, `quizzes/${quizId}`);
-                const snapshot = await get(quizRef);
-                
-                if (snapshot.exists()) {
-                    window.currentQuiz = snapshot.val();
-                    window.currentQuizId = quizId; 
-                    window.currentQuestionIndex = 0;
-                    window.score = 0;
-                    window.playerAnswers = [];
-                    
-                    hideAllScreens();
-                    document.getElementById('quiz-player-screen').classList.remove('hidden');
-                    showQuestion();
-                } else {
-                    alert('El quiz seleccionado no existe.');
-                    showMainScreen(); 
-                }
-            } catch (error) {
-                alert('Error al cargar el quiz: ' + error.message);
-                console.error('Error al cargar el quiz por ID:', error);
-                showMainScreen(); 
-            }
-        };
-
-        function showQuestion() {
-            if (window.timer) {
-                clearInterval(window.timer);
-            }
-
-            if (!window.currentQuiz || window.currentQuestionIndex >= window.currentQuiz.questions.length) {
-                showResults(); // Ir a la pantalla de resultados cuando no hay más preguntas
-                return;
-            }
-
-            const question = window.currentQuiz.questions[window.currentQuestionIndex];
-            const questionTextElement = document.getElementById('current-question');
-            
-            questionTextElement.textContent = question.question; // Set the question text
-
-            // Clear any previous image
-            const existingImage = questionTextElement.querySelector('img');
-            if (existingImage) {
-                existingImage.remove();
-            }
-
-            // Add image if available
-            if (question.image) {
-                const questionImageElement = document.createElement('img');
-                questionImageElement.src = question.image;
-                questionImageElement.alt = "Imagen de la pregunta";
-                questionTextElement.appendChild(questionImageElement);
-            }
-            
-            document.getElementById('question-number').textContent = 
-                `Pregunta ${window.currentQuestionIndex + 1} de ${window.currentQuiz.questions.length}`;
-            
-            const optionsContainer = document.getElementById('options-container');
-            optionsContainer.innerHTML = '';
-            
-            question.options.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.className = 'option-btn';
-                button.textContent = option;
-                button.onclick = () => selectOption(index, button);
-                optionsContainer.appendChild(button);
-            });
-
-            document.querySelectorAll('.option-btn').forEach(btn => {
-                btn.disabled = false;
-                btn.classList.remove('correct', 'incorrect', 'selected');
-            });
-
-            const progress = ((window.currentQuestionIndex) / window.currentQuiz.questions.length) * 100;
-            document.getElementById('progress-fill').style.width = progress + '%';
-            
-            startTimer();
-            
-            document.getElementById('next-btn').style.display = 'none';
-            // Ocultar y limpiar el feedback message al mostrar una nueva pregunta
-            const feedbackMessage = document.getElementById('feedback-message');
-            feedbackMessage.classList.remove('show', 'correct', 'incorrect');
-            feedbackMessage.textContent = '';
-        }
-
-        function startTimer() {
-            window.timeLeft = 30; 
-            document.getElementById('timer').textContent = window.timeLeft;
-            
-            window.timer = setInterval(() => {
-                window.timeLeft--;
-                document.getElementById('timer').textContent = window.timeLeft;
-                
-                if (window.timeLeft <= 0) {
-                    clearInterval(window.timer);
-                    window.playerAnswers.push(null); 
-                    const question = window.currentQuiz.questions[window.currentQuestionIndex];
-                    document.querySelectorAll('.option-btn').forEach((btn, idx) => {
-                        btn.disabled = true;
-                        if (idx === question.correctAnswer) {
-                            btn.classList.add('correct');
-                        }
-                    });
-                    
-                    // **MEJORADO: Mensaje de tiempo agotado**
-                    showFeedbackMessage('¡Tiempo agotado! ⌛', 'incorrect');
-
-                    // Actualizar el score del jugador en Firebase (si no se ha respondido)
-                    if (window.currentPlayerId && window.currentQuizId) {
-                        const playerSessionRef = ref(database, `sessions/${window.currentQuizId}/players/${window.currentPlayerId}`);
-                        update(playerSessionRef, {
-                            lastAnswerTime: Date.now() 
-                        }).catch(error => {
-                            console.error('Error al actualizar tiempo de jugador en timeout:', error);
-                        });
-                    }
-
-                    setTimeout(() => {
-                        window.currentQuestionIndex++;
-                        showQuestion();
-                    }, 2000); 
-                }
-            }, 1000);
-        }
-
-        function selectOption(selectedIndex, selectedButton) {
-            clearInterval(window.timer); 
-            
-            const question = window.currentQuiz.questions[window.currentQuestionIndex];
-            const isCorrect = selectedIndex === question.correctAnswer;
-            
-            const optionButtons = document.querySelectorAll('.option-btn');
-            optionButtons.forEach(btn => {
-                btn.disabled = true;
-            });
-
-            optionButtons.forEach((btn, index) => {
-                if (index === question.correctAnswer) {
-                    btn.classList.add('correct');
-                } else if (index === selectedIndex && !isCorrect) {
-                    btn.classList.add('incorrect');
-                }
-            });
-
-            if (isCorrect) {
-                window.score++;
-                // **MEJORADO: Mensaje y animación de correcto**
-                const correctMessages = [
-                    "¡Correcto! Eres un genio 🎉",
-                    "¡Increíble! Acertaste 💪",
-                    "¡Perfecto! Sigue así ✨",
-                    "¡Lo lograste! Fantástico 💯"
-                ];
-                const randomCorrectMessage = correctMessages[Math.floor(Math.random() * correctMessages.length)];
-                showFeedbackMessage(randomCorrectMessage, 'correct');
-            } else {
-                // **MEJORADO: Mensaje y animación de incorrecto**
-                const incorrectMessages = [
-                    "¡Oops! Inténtalo de nuevo. La práctica hace al maestro 🧠",
-                    "Casi lo logras. ¡No te preocupes! 🌟",
-                    "Esa no era. ¡Sigue intentando! Siempre hay una nueva oportunidad 👍",
-                    "No te rindas. ¡Estás cerca de dominarlo! 🚀"
-                ];
-                const randomIncorrectMessage = incorrectMessages[Math.floor(Math.random() * incorrectMessages.length)];
-                showFeedbackMessage(randomIncorrectMessage, 'incorrect');
-            }
-            
-            window.playerAnswers.push(selectedIndex);
-
-            // Actualizar el score del jugador en tiempo real en Firebase
-            if (window.currentPlayerId && window.currentQuizId) {
-                const playerSessionRef = ref(database, `sessions/${window.currentQuizId}/players/${window.currentPlayerId}`);
-                update(playerSessionRef, {
-                    score: window.score,
-                    lastAnswerTime: Date.now()
-                }).catch(error => {
-                    console.error('Error al actualizar score de jugador:', error);
-                });
-            }
-            
-            setTimeout(() => {
-                document.getElementById('next-btn').style.display = 'block';
-            }, 1500); 
-        }
-
-        // **MEJORADO: Función para mostrar el mensaje de retroalimentación**
-        function showFeedbackMessage(message, type) {
-            const feedbackMessage = document.getElementById('feedback-message');
-            feedbackMessage.textContent = message;
-            feedbackMessage.classList.add('show', type);
-
-            setTimeout(() => {
-                feedbackMessage.classList.remove('show', type);
-                feedbackMessage.textContent = ''; 
-            }, 1800); 
-        }
-
-        window.nextQuestion = function() {
-            document.getElementById('next-btn').style.display = 'none'; 
-            window.currentQuestionIndex++;
-            showQuestion();
-        };
-
-        function showResults() {
-            hideAllScreens();
-            document.getElementById('results-screen').classList.remove('hidden');
-            
-            const scoreDisplay = document.getElementById('final-score');
-            const scoreMessage = document.getElementById('score-message');
-            const playerNameDisplay = document.getElementById('player-name-display'); 
-
-            // Asegurarse de que playerName está disponible
-            // Si el nombre no está en window.playerName, intenta recuperarlo de localStorage
-            playerNameDisplay.textContent = window.playerName || localStorage.getItem('currentPlayerName') || 'Jugador Desconocido'; 
-            
-            const totalQuestions = window.currentQuiz ? window.currentQuiz.questions.length : 0;
-            scoreDisplay.textContent = `${window.score}/${totalQuestions}`;
-            
-            const percentage = totalQuestions > 0 ? (window.score / totalQuestions) * 100 : 0;
-            
-            if (percentage >= 90) {
-                scoreMessage.textContent = '🏆 ¡Perfecto! Eres un maestro del tema.';
-                scoreDisplay.classList.add('celebration');
-            } else if (percentage >= 70) {
-                scoreMessage.textContent = '🎉 ¡Muy bien! Buen dominio del tema.';
-                scoreDisplay.classList.remove('celebration');
-            } else if (percentage >= 50) {
-                scoreMessage.textContent = '👍 ¡Bien hecho! Puedes mejorar un poco más.';
-                scoreDisplay.classList.remove('celebration');
-            } else {
-                scoreMessage.textContent = '📚 ¡Sigue practicando! La práctica hace al maestro.';
-                scoreDisplay.classList.remove('celebration');
-            }
-
-            savePlayerResult();
-        }
-
-        async function savePlayerResult() {
-            // Asegurarse de que currentPlayerId y currentQuizId están definidos antes de intentar guardar
-            if (window.currentQuizId && window.currentPlayerId && window.currentQuiz) {
-                const playerSessionRef = ref(database, `sessions/${window.currentQuizId}/players/${window.currentPlayerId}`);
-                try {
-                    await update(playerSessionRef, {
-                        score: window.score,
-                        totalQuestions: window.currentQuiz.questions.length, // Asegurar que se guarda el total
-                        isFinished: true, // Marcar que ha terminado el juego
-                        timestamp: new Date().toISOString() // Registrar el tiempo final
-                    });
-                    console.log('Resultado final del jugador actualizado en Firebase.');
-                } catch (error) {
-                    console.error('Error al guardar el resultado final del jugador:', error);
-                }
-            } else {
-                console.warn('No se pudo guardar el resultado del jugador: Faltan quizId, currentPlayerId o currentQuiz.');
-            }
-        }
-
-        async function loadPlayerResults(quizId) {
-            const playerResultsContainer = document.getElementById('player-results-container');
-            playerResultsContainer.innerHTML = '<div class="loading"></div>';
-
-            try {
-                // Busca en las sesiones activas, no en quizzes directamente
-                const sessionsRef = ref(database, `sessions/${quizId}/players`); 
-                const snapshot = await get(sessionsRef);
-
-                if (snapshot.exists()) {
-                    const players = snapshot.val();
-                    
-                    // Filtrar solo los jugadores que han finalizado el juego (isFinished: true)
-                    // Y obtener los datos más recientes y/o mejores de cada jugador por nombre si hay duplicados
-                    const processedPlayers = {}; 
-                    Object.values(players).forEach(player => {
-                        // Solo considerar jugadores que han terminado el quiz y tienen totalQuestions
-                        if (player.isFinished && player.totalQuestions !== undefined && player.totalQuestions !== null) { 
-                            // Si ya existe un resultado para este nombre, actualizar si el actual es más reciente/mejor
-                            if (!processedPlayers[player.name] || 
-                                (player.score > processedPlayers[player.name].score) ||
-                                (player.score === processedPlayers[player.name].score && new Date(player.timestamp) > new Date(processedPlayers[player.name].timestamp))
-                            ) {
-                                processedPlayers[player.name] = player;
-                            }
-                        }
-                    });
-
-                    const sortedPlayers = Object.values(processedPlayers).sort((a, b) => b.score - a.score);
-
-                    let tableHtml = `
-                        <table class="player-results-table">
-                            <thead>
-                                <tr>
-                                    <th>Posición</th>
-                                    <th>Nombre</th>
-                                    <th>Puntuación</th>
-                                    <th>Fecha</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    `;
-
-                    if (sortedPlayers.length > 0) {
-                        sortedPlayers.forEach((player, index) => {
-                            const date = player.timestamp ? new Date(player.timestamp).toLocaleString() : 'N/A';
-                            // Un jugador es 'winner' si es el primero Y ha terminado el quiz
-                            const isWinner = (index === 0 && player.isFinished);
-                            tableHtml += `
-                                <tr class="${isWinner ? 'winner' : ''}">
-                                    <td>${index + 1}</td>
-                                    <td>${player.name}</td>
-                                    <td>${player.score}/${player.totalQuestions || 'N/A'}</td>
-                                    <td>${date}</td>
-                                </tr>
-                            `;
-                        });
+            snapshot.forEach((clientSnapshot) => {
+                const clientCredentials = clientSnapshot.val();
+                if (clientCredentials.username === username && clientCredentials.password === password) {
+                    found = true;
+                    if (rememberMe) {
+                        localStorage.setItem('username', username);
                     } else {
-                        tableHtml += `<tr><td colspan="4">No hay resultados finalizados para mostrar.</td></tr>`;
+                        localStorage.removeItem('username');
                     }
-
-                    tableHtml += `
-                            </tbody>
-                        </table>
-                    `;
-                    playerResultsContainer.innerHTML = tableHtml;
-                } else {
-                    playerResultsContainer.innerHTML = '<p>Aún no hay resultados de jugadores para este quiz.</p>';
+                    window.location.href = `viewClient.html?username=${username}`;
+                    return true;
                 }
-            } catch (error) {
-                console.error('Error al cargar los resultados de los jugadores:', error);
-                playerResultsContainer.innerHTML = '<p>Error al cargar los resultados de los jugadores.</p>';
-            }
-        }
-
-
-        window.playAgain = function() {
-            // Reinicia las variables del juego
-            window.currentQuestionIndex = 0;
-            window.score = 0;
-            window.playerAnswers = [];
-            // Limpiar datos de localStorage del juego actual
-            localStorage.removeItem('currentQuizId');
-            localStorage.removeItem('currentQuiz');
-            localStorage.removeItem('currentPlayerId');
-            localStorage.removeItem('currentPlayerName');
-            window.currentQuiz = null;
-            window.currentQuizId = null;
-            window.currentPlayerId = null;
-            window.playerName = '';
-
-            // Volver a la pantalla principal para que el usuario elija qué hacer
-            showMainScreen(); 
-        };
-
-        // **MEJORADO: Funciones para el Panel de Administración**
-        async function loadAdminQuizList() {
-            const adminQuizList = document.getElementById('admin-quiz-list');
-            adminQuizList.innerHTML = '<div class="loading"></div>';
-
-            try {
-                const quizzesRef = ref(database, 'quizzes');
-                const snapshot = await get(quizzesRef);
-                
-                if (snapshot.exists()) {
-                    const quizzes = snapshot.val();
-                    let html = '';
-                    Object.entries(quizzes).forEach(([id, quiz]) => {
-                        html += `
-                            <div class="admin-quiz-item">
-                                <div>
-                                    <h3>${quiz.title}</h3>
-                                    <p>Código: <strong>${quiz.code}</strong> • Preguntas: ${quiz.questions.length}</p>
-                                </div>
-                                <div>
-                                    <button class="btn" onclick="startRealtimeMonitor('${id}', '${quiz.title.replace(/'/g, "\\'")}')">
-                                        Ver Resultados en Vivo
-                                    </button>
-                                    <button class="btn btn-delete" onclick="deleteQuiz('${id}', '${quiz.title.replace(/'/g, "\\'")}')">
-                                        Eliminar Quiz
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    adminQuizList.innerHTML = html;
-                } else {
-                    adminQuizList.innerHTML = '<p>No hay quizzes para administrar.</p>';
-                }
-            }
-            catch (error) {
-                console.error('Error al cargar quizzes para admin:', error);
-                adminQuizList.innerHTML = '<p>Error al cargar la lista de quizzes para el panel de administración.</p>';
-            }
-        }
-
-        // **MEJORADO: Iniciar monitoreo en tiempo real de un quiz**
-        window.startRealtimeMonitor = function(quizId, quizTitle) {
-            stopRealtimeUpdates(); 
-
-            document.getElementById('admin-realtime-results').classList.remove('hidden');
-            document.getElementById('admin-results-quiz-title').textContent = `Resultados en Vivo para: ${quizTitle}`;
-            const resultsContainer = document.getElementById('admin-results-table-container');
-            resultsContainer.innerHTML = '<p>Cargando resultados en tiempo real...</p>';
-
-            // Set up the download button's click handler
-            const downloadBtn = document.getElementById('download-results-btn');
-            downloadBtn.onclick = () => downloadAdminResultsCSV(quizId, quizTitle);
-            
-            const playersRef = ref(database, `sessions/${quizId}/players`); // Ahora escucha en 'sessions'
-            window.realtimeListenerRef = playersRef; 
-
-            onValue(playersRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const players = snapshot.val();
-                    let tableHtml = `
-                        <table class="player-results-table">
-                            <thead>
-                                <tr>
-                                    <th>Posición</th>
-                                    <th>Nombre</th>
-                                    <th>Puntuación</th>
-                                    <th>Estado</th>
-                                    <th>Última Actividad</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    `;
-
-                    // Convertir a array y ordenar por puntuación descendente, luego por última actividad
-                    const sortedPlayers = Object.values(players).sort((a, b) => {
-                        if (b.score !== a.score) {
-                            return b.score - a.score;
-                        }
-                        // Si tienen el mismo score, el que terminó primero o el que tiene actividad más reciente
-                        if (a.isFinished && !b.isFinished) return -1; // Finalizado antes que no finalizado
-                        if (!a.isFinished && b.isFinished) return 1;
-                        return (new Date(b.timestamp || b.lastAnswerTime)) - (new Date(a.timestamp || a.lastAnswerTime));
-                    });
-                    
-                    sortedPlayers.forEach((player, index) => {
-                        const status = player.isFinished ? 'Completado ✅' : 'Jugando...';
-                        const lastActivity = player.timestamp ? new Date(player.timestamp).toLocaleTimeString() : (player.lastAnswerTime ? new Date(player.lastAnswerTime).toLocaleTimeString() : 'N/A');
-                        
-                        // Un jugador es 'winner' si es el primero Y ha terminado el quiz
-                        const isWinner = (index === 0 && player.isFinished);
-                        
-                        tableHtml += `
-                            <tr class="${isWinner ? 'winner' : ''}">
-                                <td>${index + 1}</td>
-                                <td>${player.name}</td>
-                                <td>${player.score}/${player.totalQuestions || 'N/A'}</td>
-                                <td>${status}</td>
-                                <td>${lastActivity}</td>
-                            </tr>
-                        `;
-                    });
-
-                    tableHtml += `
-                            </tbody>
-                        </table>
-                    `;
-                    resultsContainer.innerHTML = tableHtml;
-                } else {
-                    resultsContainer.innerHTML = '<p>Aún no hay resultados de jugadores para este quiz.</p>';
-                }
-            }, (error) => {
-                console.error('Error en el monitoreo en tiempo real:', error);
-                resultsContainer.innerHTML = '<p>Error al cargar los resultados en tiempo real.</p>';
             });
-        };
 
-        // **MEJORADO: Detener monitoreo en tiempo real**
-        window.stopRealtimeUpdates = function() {
-            if (window.realtimeListenerRef) {
-                off(window.realtimeListenerRef); 
-                window.realtimeListenerRef = null;
-                console.log('Monitoreo en tiempo real detenido.');
+            if (!found) {
+                showMessage('Usuario o contraseña incorrectos');
             }
-            document.getElementById('admin-realtime-results').classList.add('hidden');
-            document.getElementById('admin-results-table-container').innerHTML = ''; 
-            // Clear the download button's click handler when monitoring stops
-            document.getElementById('download-results-btn').onclick = null;
-        };
+        } catch (error) {
+            console.error('Error de autenticación:', error);
+            showMessage('Error al intentar iniciar sesión. Por favor, intente nuevamente.');
+        }
+    });
 
-        // **NUEVO: Función para eliminar un quiz**
-        window.deleteQuiz = async function(quizId, quizTitle) {
-            if (confirm(`¿Estás seguro de que quieres eliminar el quiz "${quizTitle}"? Esta acción es irreversible.`)) {
-                try {
-                    const quizRef = ref(database, `quizzes/${quizId}`);
-                    const sessionsRef = ref(database, `sessions/${quizId}`); // También eliminar sesiones asociadas
-                    await remove(quizRef);
-                    await remove(sessionsRef); // Eliminar las sesiones de juego
-                    alert(`El quiz "${quizTitle}" y sus sesiones asociadas han sido eliminados exitosamente.`);
-                    loadAdminQuizList(); // Recargar la lista de quizzes en el panel de administración
-                    stopRealtimeUpdates(); // Detener el monitoreo si se estaba viendo este quiz
-                } catch (error) {
-                    console.error('Error al eliminar el quiz:', error);
-                    alert('Error al eliminar el quiz: ' + error.message);
+    window.addEventListener('load', () => {
+        const savedUsername = localStorage.getItem('username');
+        if (savedUsername) {
+            document.getElementById('username').value = savedUsername;
+            document.getElementById('rememberMe').checked = true;
+        }
+    });
+
+    document.querySelectorAll('input').forEach(input => {
+        input.addEventListener('input', () => showMessage('', false));
+    });
+
+    function togglePasswordVisibility() {
+        const passwordInput = document.getElementById('password');
+        const passwordToggleIcon = document.getElementById('passwordToggleIcon');
+
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            passwordToggleIcon.classList.remove('fa-eye-slash');
+            passwordToggleIcon.classList.add('fa-eye');
+        } else {
+            passwordInput.type = 'text';
+            passwordInput.type = 'password';
+            passwordToggleIcon.classList.remove('fa-eye');
+            passwordToggleIcon.classList.add('fa-eye-slash');
+        }
+    }
+
+    // Esperar a que el DOM esté completamente cargado
+    document.addEventListener('DOMContentLoaded', function() {
+        const eyes = document.getElementById('eyes');
+        const hands = document.getElementById('hands');
+        const armsRest = document.getElementById('arms-rest');
+        const pupils = document.getElementById('pupils');
+
+        // Función para manejar las animaciones del mono
+        function updateMonkey(input) {
+            if (input.id === 'username') {
+                // Animación para el campo de usuario
+                pupils.style.animation = 'lookAround 2s infinite';
+                hands.setAttribute('opacity', '0');
+                armsRest.setAttribute('opacity', '1');
+                eyes.style.animation = 'blink 4s infinite';
+            } else if (input.id === 'password') {
+                // Animación para el campo de contraseña
+                pupils.style.animation = 'none';
+                eyes.style.animation = 'none';
+
+                if (input.type === 'password') {
+                    // Tapar ojos
+                    hands.setAttribute('opacity', '1');
+                    armsRest.setAttribute('opacity', '0');
+                } else {
+                    // Destapar ojos
+                    hands.setAttribute('opacity', '0');
+                    armsRest.setAttribute('opacity', '1');
+                    eyes.style.animation = 'blink 4s infinite';
                 }
             }
-        };
-
-        // Helper function to escape CSV fields
-        function escapeCsvField(field) {
-            if (field === null || field === undefined) {
-                return '""'; // Represent null/undefined as empty string in CSV
-            }
-            // Convert to string, replace all double quotes with two double quotes, then wrap in double quotes
-            let stringField = String(field);
-            return `"${stringField.replace(/"/g, '""')}"`;
         }
 
-        // NEW FUNCTION TO DOWNLOAD RESULTS AS CSV (IMPROVED FOR EXCEL)
-        window.downloadAdminResultsCSV = async function(quizId, quizTitle) {
-            try {
-                const sessionsRef = ref(database, `sessions/${quizId}/players`);
-                const snapshot = await get(sessionsRef);
+        // Event listeners para los campos
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
 
-                if (!snapshot.exists()) {
-                    alert('No hay datos de jugadores para descargar para este quiz.');
-                    return;
-                }
+        usernameInput.addEventListener('focus', () => updateMonkey(usernameInput));
+        passwordInput.addEventListener('focus', () => updateMonkey(passwordInput));
 
-                const players = snapshot.val();
-                const processedPlayers = {};
-                Object.values(players).forEach(player => {
-                    if (player.name) { // Ensure player has a name
-                        if (!processedPlayers[player.name] || 
-                            (player.score > (processedPlayers[player.name].score || 0)) ||
-                            (player.score === (processedPlayers[player.name].score || 0) && new Date(player.timestamp || player.lastAnswerTime) > new Date(processedPlayers[player.name].timestamp || processedPlayers[player.name].lastAnswerTime))
-                        ) {
-                            processedPlayers[player.name] = player;
-                        }
-                    }
-                });
+        // Modificar la función togglePasswordVisibility
+        window.togglePasswordVisibility = function() {
+            const passwordInput = document.getElementById('password');
+            const passwordToggleIcon = document.getElementById('passwordToggleIcon');
 
-                const sortedPlayers = Object.values(processedPlayers).sort((a, b) => b.score - a.score);
-
-                // Add BOM for UTF-8 compatibility in Excel
-                const BOM = "\ufeff"; 
-                let csvContent = BOM;
-                csvContent += "Posición,Nombre,Puntuación,Total Preguntas,Estado,Última Actividad (Fecha),Última Actividad (Hora)\n";
-
-                sortedPlayers.forEach((player, index) => {
-                    const status = player.isFinished ? 'Completado' : 'Jugando';
-                    const lastActivityDateObj = player.timestamp ? new Date(player.timestamp) : (player.lastAnswerTime ? new Date(player.lastAnswerTime) : null);
-                    const datePart = lastActivityDateObj ? lastActivityDateObj.toLocaleDateString() : 'N/A';
-                    const timePart = lastActivityDateObj ? lastActivityDateObj.toLocaleTimeString() : 'N/A';
-                    
-                    csvContent += [
-                        escapeCsvField(index + 1),
-                        escapeCsvField(player.name),
-                        escapeCsvField(player.score !== undefined ? player.score : 'N/A'),
-                        escapeCsvField(player.totalQuestions !== undefined ? player.totalQuestions : 'N/A'),
-                        escapeCsvField(status),
-                        escapeCsvField(datePart),
-                        escapeCsvField(timePart)
-                    ].join(',') + '\n';
-                });
-
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                if (link.download !== undefined) { 
-                    const url = URL.createObjectURL(blob);
-                    link.setAttribute('href', url);
-                    link.setAttribute('download', `${quizTitle}_resultados.csv`);
-                    link.style.visibility = 'hidden';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                } else {
-                    // Fallback for browsers that don't support the download attribute
-                    window.open('data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
-                }
-                alert('¡Resultados descargados exitosamente en formato CSV!');
-
-            } catch (error) {
-                console.error('Error al descargar los resultados:', error);
-                alert('Error al descargar los resultados: ' + error.message);
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                passwordToggleIcon.classList.remove('fa-eye-slash');
+                passwordToggleIcon.classList.add('fa-eye');
+            } else {
+                passwordInput.type = 'password';
+                passwordToggleIcon.classList.remove('fa-eye');
+                passwordToggleIcon.classList.add('fa-eye-slash');
             }
+
+            updateMonkey(passwordInput);
         };
 
-        // Inicializar la aplicación al cargar el DOM
-        document.addEventListener('DOMContentLoaded', function() {
-            if (document.getElementById('questions-container').children.length === 0) {
-                addQuestion();
-            }
-
-            // LÓGICA PARA MANEJAR LA REDIRECCIÓN DESDE join_quiz.html o iniciar juego directo
-            const urlParams = new URLSearchParams(window.location.search);
-            const screenParam = urlParams.get('screen');
-            const quizIdParam = urlParams.get('quizId');
-
-            if (screenParam === 'player' && quizIdParam) {
-                // Cargar los datos del quiz y jugador desde localStorage
-                const storedQuiz = localStorage.getItem('currentQuiz');
-                const storedPlayerId = localStorage.getItem('currentPlayerId');
-                const storedPlayerName = localStorage.getItem('currentPlayerName');
-
-                if (storedQuiz && storedPlayerId && storedPlayerName) {
-                    window.currentQuiz = JSON.parse(storedQuiz);
-                    window.currentPlayerId = storedPlayerId;
-                    window.playerName = storedPlayerName; // Asegurar que playerName esté en window
-                    window.currentQuizId = quizIdParam; // Asegurarse de tener el ID del quiz
-
-                    showQuizPlayer(); // Mostrar la pantalla del jugador del quiz
-                } else {
-                    // Si falta información, volver a la pantalla principal y limpiar localStorage
-                    alert('Error al iniciar el quiz. Por favor, intenta unirte de nuevo o selecciona un quiz para jugar.');
-                    localStorage.removeItem('currentQuizId');
-                    localStorage.removeItem('currentQuiz');
-                    localStorage.removeItem('currentPlayerId');
-                    localStorage.removeItem('currentPlayerName');
-                    showMainScreen(); // Ir a la pantalla principal sin intentar jugar
+        // Resetear cuando se pierde el foco
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('blur', () => {
+                pupils.style.animation = 'none';
+                if (input.id === 'password' && input.type === 'password') {
+                    hands.setAttribute('opacity', '1');
+                    armsRest.setAttribute('opacity', '0');
                 }
-            } else {
-                showMainScreen(); // Mostrar la pantalla principal por defecto si no hay parámetros de juego
-            }
+            });
         });
-    </script>
+    });
+</script>
 </body>
 </html>
