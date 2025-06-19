@@ -130,15 +130,6 @@
             box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
         }
 
-        .gender-select {
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            min-width: 100px;
-        }
-
         .btn {
             padding: 12px 24px;
             border: none;
@@ -240,13 +231,14 @@
         }
 
         .race-track {
-            background: linear-gradient(to right, #8b4513, #a0522d);
+            background: linear-gradient(to right, #228B22, #32CD32);
             border-radius: 12px;
             padding: 20px;
             position: relative;
             overflow: hidden;
             min-height: 400px;
             box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.3);
+            border: 4px solid #8B4513;
         }
 
         .race-track::before {
@@ -276,6 +268,7 @@
             position: relative;
             min-height: 70px;
             backdrop-filter: blur(5px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
         }
 
         .lane:nth-child(even) {
@@ -288,20 +281,21 @@
             height: 50px;
             transition: transform 0.1s ease-out;
             z-index: 10;
+            transform: scaleX(-1); /* VOLTEO DEL CONTENEDOR - SOLUCIÓN DEFINITIVA */
         }
 
         .horse {
             font-size: 36px;
             animation: gallop 0.6s infinite;
             filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
-            transform-origin: center;
+            display: inline-block; /* IMPORTANTE PARA LA ANIMACIÓN */
         }
 
         @keyframes gallop {
-            0%, 100% { transform: rotate(-3deg) translateY(0px); }
-            25% { transform: rotate(2deg) translateY(-4px); }
-            50% { transform: rotate(-2deg) translateY(-2px); }
-            75% { transform: rotate(3deg) translateY(-5px); }
+            0%, 100% { transform: rotate(3deg) translateY(0); }
+            25% { transform: rotate(-2deg) translateY(-5px); }
+            50% { transform: rotate(3deg) translateY(0); }
+            75% { transform: rotate(-5deg) translateY(-8px); }
         }
 
         .player-info {
@@ -320,6 +314,7 @@
         .player-position {
             font-size: 0.9rem;
             color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
         }
 
         .progress-container {
@@ -345,16 +340,34 @@
             right: 20px;
             top: 0;
             bottom: 0;
-            width: 6px;
+            width: 8px;
             background: repeating-linear-gradient(
                 0deg,
-                white 0px,
-                white 12px,
-                #333 12px,
-                #333 24px
+                #000 0px,
+                #000 12px,
+                #fff 12px,
+                #fff 24px
             );
-            border-radius: 3px;
+            border-radius: 4px;
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            z-index: 5;
+            border: 2px solid #333;
+        }
+
+        .start-line {
+            position: absolute;
+            left: 80px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: repeating-linear-gradient(
+                0deg,
+                #fff 0px,
+                #fff 8px,
+                #000 8px,
+                #000 16px
+            );
+            border-radius: 2px;
             z-index: 5;
         }
 
@@ -542,23 +555,56 @@
             border-radius: 8px;
             padding: 10px;
             background: #f8f9fa;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-color) #f1f1f1;
+        }
+
+        .players-list::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .players-list::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .players-list::-webkit-scrollbar-thumb {
+            background: var(--accent-color);
+            border-radius: 4px;
         }
 
         .player-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 8px 12px;
-            margin: 5px 0;
+            padding: 12px 15px;
+            margin: 8px 0;
             background: white;
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid #e2e8f0;
+            transition: var(--transition);
+        }
+
+        .player-item:hover {
+            transform: translateX(3px);
+            box-shadow: var(--shadow-light);
         }
 
         .player-preview {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+        }
+
+        .player-preview .horse-emoji {
+            font-size: 1.8rem;
+            filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+        }
+
+        .player-name-display {
+            font-weight: 600;
+            font-size: 1rem;
+            color: var(--primary-color);
         }
 
         .scrollable-track {
@@ -594,6 +640,31 @@
 
         @keyframes spin {
             to { transform: rotate(360deg); }
+        }
+
+        .race-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px 0;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .race-info h3 {
+            margin: 0;
+            color: white;
+            font-size: 1.4rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .race-status {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            color: white;
+            font-weight: 600;
+            backdrop-filter: blur(5px);
         }
 
         @media (max-width: 1024px) {
@@ -666,7 +737,7 @@
     <div class="container">
         <div class="header">
             <h1>🏇 Sistema Profesional de Carreras</h1>
-            <p>Plataforma avanzada para competencias ecuestres</p>
+            <p>Plataforma avanzada para competencias - Desarrollado por Alex Rendon - Merchandising Express</p>
         </div>
 
         <button class="btn btn-primary sound-toggle" onclick="toggleSound()">🔊</button>
@@ -677,7 +748,7 @@
                 <div class="player-management">
                     <div class="bulk-controls">
                         <textarea class="bulk-input player-input" id="bulkInput" 
-                                  placeholder="Agregar múltiples jugadores (uno por línea)&#10;Ejemplo:&#10;Juan Pérez&#10;María García&#10;Carlos López"></textarea>
+                                placeholder="Agregar múltiples participantes (uno por línea)&#10;Ejemplo:&#10;Juan Pérez&#10;María García&#10;Carlos López"></textarea>
                         <button class="btn btn-primary" onclick="addBulkPlayers()">
                             <span>📝</span> Agregar en Lote
                         </button>
@@ -686,11 +757,6 @@
                     <div class="player-input-group">
                         <input type="text" class="player-input" id="singlePlayerInput" 
                                placeholder="Nombre del participante" maxlength="30">
-                        <select class="gender-select" id="genderSelect">
-                            <option value="auto">Auto</option>
-                            <option value="male">Masculino</option>
-                            <option value="female">Femenino</option>
-                        </select>
                         <button class="btn btn-primary btn-sm" onclick="addSinglePlayer()">
                             <span>➕</span> Agregar
                         </button>
@@ -750,9 +816,13 @@
         </div>
 
         <div class="race-container">
-            <h3 style="margin-bottom: 20px; color: var(--primary-color);">🏁 Pista de Carreras</h3>
+            <div class="race-info">
+                <h3>🏁 Pista de Carreras</h3>
+                <div class="race-status" id="raceStatus">Preparando...</div>
+            </div>
             <div class="race-track scrollable-track" id="raceTrack">
                 <div class="finish-line"></div>
+                <div class="start-line"></div>
                 <div style="text-align: center; padding: 50px; color: rgba(255,255,255,0.7);">
                     <p>Registra participantes para comenzar la carrera</p>
                 </div>
@@ -769,7 +839,6 @@
         </div>
     </div>
 
-    <!-- Modales -->
     <div class="winner-modal" id="winnerModal">
         <div class="winner-content">
             <h2>🎉 ¡CAMPEÓN! 🎉</h2>
@@ -789,6 +858,7 @@
         class ProfessionalHorseRace {
             constructor() {
                 this.players = [];
+                this.winners = []; // Almacena los ganadores retirados
                 this.raceActive = false;
                 this.raceCount = 0;
                 this.leaderboard = new Map();
@@ -796,17 +866,11 @@
                 this.raceStartTime = 0;
                 this.raceInterval = null;
                 this.positions = [];
-                
-                // Caballos por género
-                this.horses = {
-                    male: ['🐎', '🏇🏻', '🏇🏼', '🏇🏽', '🏇🏾', '🏇🏿'],
-                    female: ['🐴', '🏇🏻‍♀️', '🏇🏼‍♀️', '🏇🏽‍♀️', '🏇🏾‍♀️', '🏇🏿‍♀️'],
-                    neutral: ['🦄', '🐎', '🐴']
-                };
-                
-                // Nombres comunes para detección automática de género
-                this.maleNames = ['juan', 'carlos', 'luis', 'miguel', 'antonio', 'francisco', 'manuel', 'pedro', 'alejandro', 'david', 'daniel', 'adrian', 'jose', 'jorge', 'sergio', 'roberto', 'ricardo', 'fernando', 'alberto', 'oscar'];
-                this.femaleNames = ['maria', 'ana', 'carmen', 'laura', 'sofia', 'elena', 'isabel', 'patricia', 'monica', 'andrea', 'lucia', 'paula', 'cristina', 'marta', 'sara', 'natalia', 'claudia', 'valeria', 'alejandra', 'gabriela'];
+                this.playerProgress = new Map();
+                this.animationFrames = new Map();
+
+                // Emojis de caballos que miran a la derecha
+                this.horses = ['🏇', '🏇', '🏇']; 
                 
                 this.colors = [
                     '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', 
@@ -814,24 +878,83 @@
                     '#82E0AA', '#D2B4DE', '#AED6F1', '#A9DFBF', '#FAD7A0'
                 ];
                 
+                this.audioContext = null;
+                this.countdownSound = null;
+                this.goSound = null;
+                this.cheerSound = null;
+                this.gallopSound = null;
+                this.gallopSource = null;
+
                 this.initializeAudio();
                 this.updateStats();
                 this.setupEventListeners();
+                this.updateRaceStatus('Esperando participantes...');
+                this.loadGameData();
             }
 
             initializeAudio() {
-                this.audioContext = null;
                 try {
                     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    if (this.audioContext) {
+                        this.loadSound('https://www.soundjay.com/buttons/beep-01a.mp3', (buffer) => this.countdownSound = buffer);
+                        this.loadSound('https://www.soundjay.com/misc/sounds/car-go-horn-01.mp3', (buffer) => this.goSound = buffer);
+                        this.loadSound('https://www.soundjay.com/human/sounds/cheer-01.mp3', (buffer) => this.cheerSound = buffer);
+                        this.loadSound('https://www.soundjay.com/sports/sounds/gallop-01.mp3', (buffer) => this.gallopSound = buffer);
+                    }
                 } catch (e) {
-                    console.log('Audio no disponible');
+                    console.warn('Web Audio API no está soportado en este navegador o hubo un error al inicializarlo:', e);
+                    this.soundEnabled = false;
+                    document.querySelector('.sound-toggle').style.display = 'none';
                 }
             }
 
+            loadSound(url, callback) {
+                if (!this.audioContext) return;
+                fetch(url)
+                    .then(response => response.arrayBuffer())
+                    .then(arrayBuffer => this.audioContext.decodeAudioData(arrayBuffer))
+                    .then(audioBuffer => {
+                        callback(audioBuffer);
+                    })
+                    .catch(e => console.error('Error al cargar el audio:', url, e));
+            }
+
+            playSound(buffer, loop = false, volume = 1.0) {
+                if (!this.soundEnabled || !this.audioContext || !buffer) return null;
+                const source = this.audioContext.createBufferSource();
+                source.buffer = buffer;
+                source.loop = loop;
+                const gainNode = this.audioContext.createGain();
+                gainNode.gain.value = volume;
+                source.connect(gainNode).connect(this.audioContext.destination);
+                source.start(0);
+                return source;
+            }
+
+            stopSound(source) {
+                if (source) {
+                    try {
+                        source.stop();
+                    } catch (e) {
+                        console.warn("Could not stop audio source, it might have already finished playing.", e);
+                    }
+                }
+            }
+
+            toggleSound() {
+                this.soundEnabled = !this.soundEnabled;
+                const soundButton = document.querySelector('.sound-toggle');
+                soundButton.textContent = this.soundEnabled ? '🔊' : '🔇';
+                if (!this.soundEnabled && this.gallopSource) {
+                    this.stopSound(this.gallopSource);
+                    this.gallopSource = null;
+                }
+                localStorage.setItem('soundEnabled', this.soundEnabled);
+            }
+
             setupEventListeners() {
-                // Eventos de teclado
                 document.addEventListener('keydown', (e) => {
-                    if (e.code === 'Space' && !this.raceActive) {
+                    if (e.code === 'Space' && !this.raceActive && this.players.length > 0) {
                         e.preventDefault();
                         this.startRace();
                     }
@@ -844,437 +967,446 @@
                     }
                 });
 
-                // Enter en inputs
-                document.getElementById('singlePlayerInput').addEventListener('keypress', (e) => {
+                document.getElementById('singlePlayerInput').addEventListener('keydown', (e) => {
                     if (e.key === 'Enter') {
                         this.addSinglePlayer();
                     }
                 });
 
-                // Inicializar audio en primera interacción
-                document.addEventListener('click', () => {
-                    if (this.audioContext && this.audioContext.state === 'suspended') {
-                        this.audioContext.resume();
+                document.getElementById('bulkInput').addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' && e.ctrlKey) {
+                        this.addBulkPlayers();
                     }
-                }, { once: true });
-            }
+                });
 
-            detectGender(name) {
-                const cleanName = name.toLowerCase().trim().split(' ')[0];
-                
-                if (this.maleNames.includes(cleanName)) return 'male';
-                if (this.femaleNames.includes(cleanName)) return 'female';
-                
-                // Detección por terminaciones comunes
-                if (cleanName.endsWith('a') || cleanName.endsWith('ia') || cleanName.endsWith('ina')) {
-                    return 'female';
+                const savedSoundState = localStorage.getItem('soundEnabled');
+                if (savedSoundState !== null) {
+                    this.soundEnabled = JSON.parse(savedSoundState);
                 }
-                if (cleanName.endsWith('o') || cleanName.endsWith('os') || cleanName.endsWith('ez')) {
-                    return 'male';
-                }
-                
-                return 'neutral';
-            }
-
-            getHorseForPlayer(player) {
-                const horses = this.horses[player.gender] || this.horses.neutral;
-                return horses[Math.floor(Math.random() * horses.length)];
-            }
-
-            playSound(frequency, duration, type = 'sine') {
-                if (!this.soundEnabled || !this.audioContext) return;
-                
-                try {
-                    const oscillator = this.audioContext.createOscillator();
-                    const gainNode = this.audioContext.createGain();
-                    
-                    oscillator.connect(gainNode);
-                    gainNode.connect(this.audioContext.destination);
-                    
-                    oscillator.frequency.value = frequency;
-                    oscillator.type = type;
-                    
-                    gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration);
-                    
-                    oscillator.start(this.audioContext.currentTime);
-                    oscillator.stop(this.audioContext.currentTime + duration);
-                } catch (e) {
-                    console.log('Error reproduciendo sonido:', e);
-                }
+                document.querySelector('.sound-toggle').textContent = this.soundEnabled ? '🔊' : '🔇';
             }
 
             addSinglePlayer() {
                 const input = document.getElementById('singlePlayerInput');
-                const genderSelect = document.getElementById('genderSelect');
-                const name = input.value.trim();
-                
-                if (!name) {
-                    alert('Por favor, ingresa un nombre válido');
-                    return;
+                const playerName = input.value.trim();
+                if (playerName && !this.players.some(p => p.name.toLowerCase() === playerName.toLowerCase())) {
+                    const player = {
+                        name: playerName,
+                        id: Date.now(),
+                        horse: this.getRandomHorseEmoji(),
+                        color: this.getRandomColor()
+                    };
+                    this.players.push(player);
+                    input.value = '';
+                    this.renderPlayersList();
+                    this.updateStats();
+                    this.saveGameData();
+                    this.updateRaceStatus('Listo para empezar');
+                } else if (playerName) {
+                    alert('¡Este participante ya está registrado!');
                 }
-                
-                if (this.players.length >= 500) {
-                    alert('Se ha alcanzado el límite máximo de 500 participantes');
-                    return;
-                }
-                
-                if (this.players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-                    alert('Este participante ya está registrado');
-                    return;
-                }
-                
-                const gender = genderSelect.value === 'auto' ? this.detectGender(name) : genderSelect.value;
-                
-                const player = {
-                    id: Date.now() + Math.random(),
-                    name: name,
-                    gender: gender,
-                    horse: this.getHorseForPlayer({ gender }),
-                    wins: 0
-                };
-                
-                this.players.push(player);
-                input.value = '';
-                this.updatePlayersList();
-                this.updateStats();
-                this.playSound(523, 0.1);
             }
 
             addBulkPlayers() {
-                const bulkInput = document.getElementById('bulkInput');
-                const names = bulkInput.value.split('\n')
-                    .map(name => name.trim())
-                    .filter(name => name.length > 0);
-                
-                if (names.length === 0) {
-                    alert('Por favor, ingresa al menos un nombre');
-                    return;
-                }
-                
-                if (this.players.length + names.length > 500) {
-                    alert(`No se pueden agregar ${names.length} participantes. Límite: 500 participantes.`);
-                    return;
-                }
-                
-                let added = 0;
-                let duplicates = 0;
-                
-                names.forEach(name => {
-                    if (name.length > 30) {
-                        name = name.substring(0, 30);
-                    }
-                    
-                    if (!this.players.some(p => p.name.toLowerCase() === name.toLowerCase())) {
-                        const gender = this.detectGender(name);
+                const textarea = document.getElementById('bulkInput');
+                const playerNames = textarea.value.split('\n').map(name => name.trim()).filter(name => name !== '');
+                let newPlayersAdded = 0;
+                playerNames.forEach(playerName => {
+                    if (!this.players.some(p => p.name.toLowerCase() === playerName.toLowerCase())) {
                         const player = {
-                            id: Date.now() + Math.random(),
-                            name: name,
-                            gender: gender,
-                            horse: this.getHorseForPlayer({ gender }),
-                            wins: 0
+                            name: playerName,
+                            id: Date.now() + newPlayersAdded,
+                            horse: this.getRandomHorseEmoji(),
+                            color: this.getRandomColor()
                         };
                         this.players.push(player);
-                        added++;
-                    } else {
-                        duplicates++;
+                        newPlayersAdded++;
                     }
                 });
-                
-                bulkInput.value = '';
-                this.updatePlayersList();
-                this.updateStats();
-                
-                let message = `Se agregaron ${added} participantes`;
-                if (duplicates > 0) {
-                    message += `. ${duplicates} nombres duplicados fueron omitidos`;
+                if (newPlayersAdded > 0) {
+                    textarea.value = '';
+                    this.renderPlayersList();
+                    this.updateStats();
+                    this.saveGameData();
+                    this.updateRaceStatus('Listo para empezar');
+                } else {
+                    alert('No se agregaron nuevos participantes o ya estaban registrados.');
                 }
-                alert(message);
-                
-                this.playSound(659, 0.2);
             }
 
-            removePlayer(playerId) {
-                this.players = this.players.filter(p => p.id !== playerId);
-                this.updatePlayersList();
+            removePlayer(id) {
+                this.players = this.players.filter(player => player.id !== id);
+                this.renderPlayersList();
                 this.updateStats();
-                this.playSound(392, 0.1);
+                this.saveGameData();
+                if (this.players.length === 0) {
+                    this.updateRaceStatus('Esperando participantes...');
+                }
             }
 
             clearAllPlayers() {
-                if (this.players.length === 0) return;
-                
-                if (confirm('¿Estás seguro de que quieres eliminar todos los participantes?')) {
+                if (confirm('¿Estás seguro de que quieres eliminar a TODOS los participantes? Esta acción no se puede deshacer.')) {
                     this.players = [];
-                    this.updatePlayersList();
+                    this.winners = [];
+                    this.leaderboard.clear();
+                    this.raceCount = 0;
+                    this.renderPlayersList();
                     this.updateStats();
-                    this.playSound(330, 0.3);
+                    this.renderLeaderboard();
+                    this.saveGameData();
+                    this.updateRaceStatus('Esperando participantes...');
                 }
             }
 
             randomizePlayers() {
-                if (this.players.length < 2) return;
-                
-                for (let i = this.players.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [this.players[i], this.players[j]] = [this.players[j], this.players[i]];
+                if (this.players.length > 1) {
+                    for (let i = this.players.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [this.players[i], this.players[j]] = [this.players[j], this.players[i]];
+                    }
+                    this.renderPlayersList();
+                    this.saveGameData();
+                } else {
+                    alert('Necesitas al menos dos participantes para aleatorizar.');
                 }
-                
-                this.updatePlayersList();
-                this.playSound(440, 0.2);
             }
 
-            updatePlayersList() {
-                const playersList = document.getElementById('playersList');
-                
-                if (this.players.length === 0) {
-                    playersList.innerHTML = '<p>No hay participantes registrados</p>';
+            renderPlayersList() {
+                const listDiv = document.getElementById('playersList');
+                if (this.players.length === 0 && this.winners.length === 0) {
+                    listDiv.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No hay participantes registrados</p>';
                     return;
                 }
+
+                listDiv.innerHTML = '';
                 
-                playersList.innerHTML = this.players.map(player => `
-                    <div class="player-item">
-                        <div class="player-preview">
-                            <span style="font-size: 1.5rem;">${player.horse}</span>
-                            <div>
-                                <div style="font-weight: 600;">${player.name}</div>
-                                <div style="font-size: 0.8rem; color: #666;">
-                                    ${player.gender === 'male' ? 'Masculino' : player.gender === 'female' ? 'Femenino' : 'Neutro'}
-                                </div>
-                            </div>
-                        </div>
-                        <button class="btn btn-danger btn-sm" onclick="game.removePlayer(${player.id})">
-                            <span>❌</span>
-                        </button>
+                if (this.players.length > 0) {
+                    const activeHeader = document.createElement('div');
+                    activeHeader.innerHTML = '<h4 style="margin: 10px 0; color: var(--primary-color);">Participantes Activos</h4>';
+                    listDiv.appendChild(activeHeader);
+                    
+                    this.players.forEach(player => {
+                        const playerItem = this.createPlayerItem(player);
+                        listDiv.appendChild(playerItem);
+                    });
+                }
+                
+                if (this.winners.length > 0) {
+                    const winnersHeader = document.createElement('div');
+                    winnersHeader.innerHTML = '<h4 style="margin: 20px 0 10px; color: var(--success-color);">Ganadores Retirados</h4>';
+                    listDiv.appendChild(winnersHeader);
+
+                    this.winners.forEach(winner => {
+                        const winnerItem = this.createPlayerItem(winner, true);
+                        listDiv.appendChild(winnerItem);
+                    });
+                }
+            }
+
+            createPlayerItem(player, isWinner = false) {
+                const playerItem = document.createElement('div');
+                playerItem.className = 'player-item';
+                if (isWinner) {
+                    playerItem.style.opacity = '0.7';
+                    playerItem.style.borderLeft = '4px solid var(--gold-color)';
+                }
+                
+                playerItem.innerHTML = `
+                    <div class="player-preview">
+                        <span class="horse-emoji" style="color:${player.color}">${player.horse}</span>
+                        <span class="player-name-display">${player.name}</span>
+                        ${isWinner ? '<span style="color:var(--gold-color); margin-left:10px;">🏆</span>' : ''}
                     </div>
-                `).join('');
+                    ${!isWinner ? `<button class="btn btn-danger btn-sm" onclick="app.removePlayer(${player.id})">✖️</button>` : ''}
+                `;
+                return playerItem;
+            }
+
+            getRandomHorseEmoji() {
+                return this.horses[Math.floor(Math.random() * this.horses.length)];
+            }
+
+            getRandomColor() {
+                return this.colors[Math.floor(Math.random() * this.colors.length)];
             }
 
             updateStats() {
                 document.getElementById('playerCount').textContent = this.players.length;
                 document.getElementById('raceCount').textContent = this.raceCount;
-                
-                if (this.raceActive && this.raceStartTime) {
-                    const elapsed = ((Date.now() - this.raceStartTime) / 1000).toFixed(1);
-                    document.getElementById('raceTime').textContent = `${elapsed}s`;
-                    
-                    // Calcular velocidad promedio (simulada)
-                    const avgSpeed = (Math.random() * 20 + 35).toFixed(1);
-                    document.getElementById('avgSpeed').textContent = `${avgSpeed} km/h`;
+
+                let totalAvgSpeed = 0;
+                let playersWithData = 0;
+                this.leaderboard.forEach(data => {
+                    if (data.races > 0) {
+                        totalAvgSpeed += (data.totalTime / data.races);
+                        playersWithData++;
+                    }
+                });
+
+                let displayAvgSpeed = 0;
+                if (playersWithData > 0) {
+                    const averageTimeAcrossAllRaces = totalAvgSpeed / playersWithData;
+                    displayAvgSpeed = (averageTimeAcrossAllRaces > 0) ? (100000 / averageTimeAcrossAllRaces).toFixed(2) : 0;
+                }
+
+                document.getElementById('avgSpeed').textContent = `${displayAvgSpeed} km/h`;
+            }
+
+            updateRaceStatus(status) {
+                document.getElementById('raceStatus').textContent = status;
+                const startButton = document.getElementById('startButton');
+                const stopButton = document.getElementById('stopButton');
+
+                if (status === 'Carrera en curso...') {
+                    startButton.disabled = true;
+                    stopButton.disabled = false;
+                } else if (status === 'Preparando...' || status === 'Listo para empezar') {
+                    startButton.disabled = this.players.length === 0;
+                    stopButton.disabled = true;
+                } else {
+                    startButton.disabled = this.players.length === 0;
+                    stopButton.disabled = true;
                 }
             }
 
             async startRace() {
-                if (this.raceActive) return;
-                
-                if (this.players.length < 2) {
-                    alert('Se necesitan al menos 2 participantes para iniciar la carrera');
+                if (this.raceActive || this.players.length === 0) {
+                    if (this.players.length === 0) {
+                        alert('¡Necesitas al menos un participante para iniciar la carrera!');
+                    }
                     return;
                 }
-                
-                this.raceActive = true;
-                this.raceStartTime = Date.now();
-                this.positions = new Array(this.players.length).fill(0);
-                
-                // Actualizar botones
-                document.getElementById('startButton').disabled = true;
-                document.getElementById('stopButton').disabled = false;
-                
-                this.setupRaceTrack();
-                await this.countdown();
-                this.runRace();
-            }
 
-            setupRaceTrack() {
-                const raceTrack = document.getElementById('raceTrack');
-                raceTrack.innerHTML = '<div class="finish-line"></div>';
-                
-                this.players.forEach((player, index) => {
-                    const lane = document.createElement('div');
-                    lane.className = 'lane';
-                    lane.style.borderLeft = `4px solid ${this.colors[index % this.colors.length]}`;
-                    
-                    lane.innerHTML = `
-                        <div class="horse-container" id="horse-${index}">
-                            <div class="horse">${player.horse}</div>
-                        </div>
-                        <div class="player-info">
-                            <div class="player-name" style="color: ${this.colors[index % this.colors.length]}">
-                                ${player.name}
-                            </div>
-                            <div class="player-position" id="position-${index}">
-                                Posición: Preparándose...
-                            </div>
-                        </div>
-                        <div class="progress-container">
-                            <div class="progress-bar" id="progress-${index}" 
-                                 style="background: linear-gradient(90deg, ${this.colors[index % this.colors.length]}, ${this.colors[index % this.colors.length]}80)">
-                            </div>
-                        </div>
-                    `;
-                    
-                    raceTrack.appendChild(lane);
-                });
+                this.raceActive = true;
+                this.raceCount++;
+                this.updateStats();
+                this.updateRaceStatus('Contando...');
+                this.renderRaceTrack();
+                this.hideWinner();
+
+                await this.countdown();
+
+                this.updateRaceStatus('Carrera en curso...');
+                this.raceStartTime = performance.now();
+                this.gallopSource = this.playSound(this.gallopSound, true, 0.3);
+
+                this.raceInterval = setInterval(() => {
+                    this.moveHorses();
+                    this.updateRaceTime();
+                    this.checkRaceEnd();
+                }, 100);
             }
 
             async countdown() {
-                const countdownOverlay = document.getElementById('countdownOverlay');
-                const countdownNumber = document.getElementById('countdownNumber');
-                const numbers = ['3', '2', '1', '¡INICIO!'];
-                
-                countdownOverlay.style.display = 'flex';
-                
-                for (let i = 0; i < numbers.length; i++) {
-                    countdownNumber.textContent = numbers[i];
-                    countdownNumber.style.animation = 'none';
-                    
-                    // Forzar reflow para reiniciar animación
-                    countdownNumber.offsetHeight;
-                    countdownNumber.style.animation = 'countdownPulse 1s ease-in-out';
-                    
-                    // Sonidos de cuenta regresiva
-                    if (i < 3) {
-                        this.playSound(800 + (i * 100), 0.3);
-                    } else {
-                        this.playSound(1200, 0.5);
-                    }
-                    
+                const overlay = document.getElementById('countdownOverlay');
+                const numberSpan = document.getElementById('countdownNumber');
+                overlay.style.display = 'flex';
+
+                for (let i = 3; i > 0; i--) {
+                    numberSpan.textContent = i;
+                    this.playSound(this.countdownSound, false, 0.5);
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 }
-                
-                countdownOverlay.style.display = 'none';
+                numberSpan.textContent = '¡GO!';
+                this.playSound(this.goSound, false, 1.0);
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                overlay.style.display = 'none';
             }
 
-            runRace() {
-                const raceTrack = document.getElementById('raceTrack');
-                const trackWidth = raceTrack.offsetWidth - 120; // Margen para línea de meta
-                let winner = null;
-                let racePositions = [];
-                
-                this.raceInterval = setInterval(() => {
-                    if (!this.raceActive || winner) {
-                        clearInterval(this.raceInterval);
-                        return;
-                    }
-                    
-                    // Actualizar posiciones con física más realista
-                    this.positions.forEach((pos, index) => {
-                        if (winner) return;
-                        
-                        // Velocidad variable con momentum
-                        const baseSpeed = 1.5 + (Math.random() * 2);
-                        const momentum = Math.sin(Date.now() / 1000 + index) * 0.5;
-                        const finalSpeed = Math.max(0.5, baseSpeed + momentum);
-                        
-                        this.positions[index] += finalSpeed;
-                        
-                        const horseElement = document.getElementById(`horse-${index}`);
-                        const progressElement = document.getElementById(`progress-${index}`);
-                        const positionElement = document.getElementById(`position-${index}`);
-                        
-                        if (horseElement && progressElement && positionElement) {
-                            const percentage = Math.min((this.positions[index] / trackWidth) * 100, 100);
-                            horseElement.style.transform = `translateX(${this.positions[index]}px)`;
-                            progressElement.style.width = `${percentage}%`;
-                            
-                            // Actualizar posición en tiempo real
-                            racePositions = this.positions
-                                .map((pos, idx) => ({ index: idx, position: pos, name: this.players[idx].name }))
-                                .sort((a, b) => b.position - a.position);
-                            
-                            const currentRank = racePositions.findIndex(p => p.index === index) + 1;
-                            positionElement.textContent = `Posición: ${currentRank}°`;
-                            
-                            // Efectos de sonido aleatorios
-                            if (Math.random() < 0.02) {
-                                this.playSound(200 + Math.random() * 100, 0.05, 'sawtooth');
-                            }
-                        }
-                        
-                        // Verificar ganador
-                        if (this.positions[index] >= trackWidth && !winner) {
-                            winner = this.players[index];
-                            this.endRace(winner, racePositions);
-                        }
-                    });
-                    
-                    // Actualizar estadísticas en tiempo real
-                    this.updateStats();
-                    
-                }, 50);
-            }
+            renderRaceTrack() {
+                const raceTrackDiv = document.getElementById('raceTrack');
+                raceTrackDiv.innerHTML = '<div class="finish-line"></div><div class="start-line"></div>';
+                this.positions = [];
 
-            stopRace() {
-                if (!this.raceActive) return;
-                
-                this.raceActive = false;
-                if (this.raceInterval) {
-                    clearInterval(this.raceInterval);
-                }
-                
-                document.getElementById('startButton').disabled = false;
-                document.getElementById('stopButton').disabled = true;
-                
-                this.playSound(300, 0.5);
-            }
+                this.players.forEach(player => {
+                    const lane = document.createElement('div');
+                    lane.className = 'lane';
+                    lane.id = `lane-${player.id}`;
 
-            endRace(winner, finalPositions) {
-                this.raceActive = false;
-                this.raceCount++;
-                
-                if (this.raceInterval) {
-                    clearInterval(this.raceInterval);
-                }
-                
-                // Actualizar botones
-                document.getElementById('startButton').disabled = false;
-                document.getElementById('stopButton').disabled = true;
-                
-                // Actualizar estadísticas globales
-                const currentWins = this.leaderboard.get(winner.name) || 0;
-                this.leaderboard.set(winner.name, currentWins + 1);
-                
-                // Actualizar wins del jugador
-                const playerIndex = this.players.findIndex(p => p.id === winner.id);
-                if (playerIndex !== -1) {
-                    this.players[playerIndex].wins++;
-                }
-                
-                this.updateStats();
-                this.updateLeaderboard();
-                
-                // Mostrar ganador
-                document.getElementById('winnerName').textContent = winner.name;
-                document.getElementById('winnerHorse').textContent = winner.horse;
-                document.getElementById('winnerModal').style.display = 'flex';
-                
-                // Sonido de victoria épico
-                this.playVictorySound();
-                
-                // Actualizar posiciones finales
-                setTimeout(() => {
-                    finalPositions.forEach((player, index) => {
-                        const positionElement = document.getElementById(`position-${player.index}`);
-                        if (positionElement) {
-                            const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : '🏅';
-                            positionElement.textContent = `${medal} Posición: ${index + 1}°`;
-                        }
-                    });
-                }, 1000);
-            }
+                    const horseContainer = document.createElement('div');
+                    horseContainer.className = 'horse-container';
+                    horseContainer.innerHTML = `<span class="horse" style="color:${player.color};">${player.horse}</span>`;
 
-            playVictorySound() {
-                const victoryMelody = [523, 659, 784, 1047, 1319];
-                victoryMelody.forEach((note, index) => {
-                    setTimeout(() => {
-                        this.playSound(note, 0.4);
-                    }, index * 200);
+                    const playerInfo = document.createElement('div');
+                    playerInfo.className = 'player-info';
+                    playerInfo.innerHTML = `
+                        <div class="player-name">${player.name}</div>
+                        <div class="player-position">Posición: ${this.positions.length + 1}</div>
+                    `;
+
+                    lane.appendChild(horseContainer);
+                    lane.appendChild(playerInfo);
+                    raceTrackDiv.appendChild(lane);
+
+                    this.positions.push({ id: player.id, name: player.name, progress: 0, finishedTime: null });
+                    this.playerProgress.set(player.id, 0);
                 });
             }
 
+            moveHorses() {
+                if (!this.raceActive) return;
+
+                this.positions.forEach(player => {
+                    if (player.finishedTime === null) {
+                        const speedIncrement = Math.random() * 2 + 0.5;
+                        player.progress = Math.min(100, player.progress + speedIncrement);
+
+                        const horseContainer = document.getElementById(`lane-${player.id}`).querySelector('.horse-container');
+                        if (horseContainer) {
+                            const maxTranslate = document.getElementById('raceTrack').offsetWidth - horseContainer.offsetWidth - 30;
+                            const currentTranslate = (player.progress / 100) * maxTranslate;
+                            horseContainer.style.transform = `translateX(${currentTranslate}px) scaleX(-1)`;
+                        }
+                    }
+                });
+
+                this.positions.sort((a, b) => b.progress - a.progress);
+                this.updatePlayerPositionsDisplay();
+            }
+
+            updatePlayerPositionsDisplay() {
+                this.positions.forEach((player, index) => {
+                    const playerPositionDiv = document.getElementById(`lane-${player.id}`).querySelector('.player-position');
+                    if (playerPositionDiv) {
+                        playerPositionDiv.textContent = `Posición: ${index + 1}`;
+                    }
+                });
+            }
+
+            updateRaceTime() {
+                if (this.raceActive && this.raceStartTime) {
+                    const elapsedTime = (performance.now() - this.raceStartTime) / 1000;
+                    document.getElementById('raceTime').textContent = `${elapsedTime.toFixed(1)}s`;
+                }
+            }
+
+            checkRaceEnd() {
+                let allFinished = true;
+                this.positions.forEach(player => {
+                    if (player.progress >= 100 && player.finishedTime === null) {
+                        player.finishedTime = (performance.now() - this.raceStartTime) / 1000;
+                        const horseElement = document.getElementById(`lane-${player.id}`).querySelector('.horse');
+                        if (horseElement) {
+                            horseElement.style.animation = 'none';
+                        }
+                    }
+                    if (player.finishedTime === null) {
+                        allFinished = false;
+                    }
+                });
+
+                if (allFinished && this.raceActive) {
+                    this.stopRace();
+                    this.declareWinner();
+                    this.updateLeaderboard();
+                }
+            }
+
+            stopRace() {
+                if (this.raceInterval) {
+                    clearInterval(this.raceInterval);
+                    this.raceInterval = null;
+                }
+                if (this.gallopSource) {
+                    this.stopSound(this.gallopSource);
+                    this.gallopSource = null;
+                }
+                this.raceActive = false;
+                this.updateRaceStatus('Carrera Terminada');
+                document.getElementById('startButton').disabled = false;
+                document.getElementById('stopButton').disabled = true;
+
+                this.positions.forEach(player => {
+                    const horseElement = document.getElementById(`lane-${player.id}`).querySelector('.horse');
+                    if (horseElement) {
+                        horseElement.style.animation = 'none';
+                    }
+                });
+            }
+
+            resetRace() {
+                this.stopRace();
+                this.raceStartTime = 0;
+                document.getElementById('raceTime').textContent = '0.0s';
+                this.updateRaceStatus('Preparando...');
+
+                this.positions.forEach(player => {
+                    player.progress = 0;
+                    player.finishedTime = null;
+                    const horseContainer = document.getElementById(`lane-${player.id}`).querySelector('.horse-container');
+                    if (horseContainer) {
+                        horseContainer.style.transform = 'translateX(0px) scaleX(-1)';
+                        horseContainer.querySelector('.horse').style.animation = 'gallop 0.6s infinite';
+                    }
+                });
+
+                this.renderRaceTrack();
+                this.hideWinner();
+                this.updateStats();
+                this.saveGameData();
+            }
+
+            declareWinner() {
+                if (this.positions.length === 0) return;
+
+                this.positions.sort((a, b) => a.finishedTime - b.finishedTime);
+                const winner = this.positions[0];
+
+                if (winner) {
+                    const winnerIndex = this.players.findIndex(p => p.id === winner.id);
+                    if (winnerIndex !== -1) {
+                        const [winnerPlayer] = this.players.splice(winnerIndex, 1);
+                        this.winners.push(winnerPlayer);
+                    }
+
+                    document.getElementById('winnerName').textContent = winner.name;
+                    const winnerHorseElement = document.getElementById('winnerHorse');
+                    const winnerPlayer = this.players.find(p => p.id === winner.id) || this.winners.find(p => p.id === winner.id);
+                    if (winnerPlayer) {
+                        winnerHorseElement.textContent = winnerPlayer.horse;
+                        winnerHorseElement.style.color = winnerPlayer.color;
+                    }
+                    document.getElementById('winnerModal').style.display = 'flex';
+                    this.playSound(this.cheerSound, false, 0.7);
+
+                    this.renderPlayersList();
+                }
+            }
+
+            hideWinner() {
+                document.getElementById('winnerModal').style.display = 'none';
+            }
+
             updateLeaderboard() {
+                if (this.positions.length === 0) return;
+
+                const sortedResults = [...this.positions].sort((a, b) => a.finishedTime - b.finishedTime);
+
+                sortedResults.forEach((player) => {
+                    let playerData = this.leaderboard.get(player.name);
+                    if (!playerData) {
+                        playerData = { wins: 0, races: 0, totalTime: 0, avgSpeed: 0 };
+                    }
+                    playerData.races++;
+                    playerData.totalTime += player.finishedTime;
+                    playerData.avgSpeed = playerData.totalTime / playerData.races;
+
+                    this.leaderboard.set(player.name, playerData);
+                });
+
+                const winnerName = sortedResults[0].name;
+                const winnerData = this.leaderboard.get(winnerName);
+                if (winnerData) {
+                    winnerData.wins++;
+                    this.leaderboard.set(winnerName, winnerData);
+                }
+
+                this.renderLeaderboard();
+                this.saveGameData();
+            }
+
+            renderLeaderboard() {
                 const leaderboardList = document.getElementById('leaderboardList');
-                
                 if (this.leaderboard.size === 0) {
                     leaderboardList.innerHTML = `
                         <p style="text-align: center; color: #666; padding: 20px;">
@@ -1283,145 +1415,113 @@
                     `;
                     return;
                 }
-                
-                const sortedLeaders = [...this.leaderboard.entries()]
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 20); // Mostrar solo top 20
-                
-                leaderboardList.innerHTML = sortedLeaders
-                    .map(([name, wins], index) => {
-                        const medals = ['🥇', '🥈', '🥉'];
-                        const medal = medals[index] || '🏅';
-                        const rankClass = index === 0 ? 'first' : index === 1 ? 'second' : index === 2 ? 'third' : '';
-                        
-                        // Encontrar el jugador para obtener su caballo
-                        const player = this.players.find(p => p.name === name);
-                        const horse = player ? player.horse : '🏇';
-                        
-                        return `
-                            <div class="leaderboard-item ${rankClass}">
-                                <div class="player-rank">
-                                    <span class="rank-medal">${medal}</span>
-                                    <span style="font-size: 1.2rem;">${horse}</span>
-                                    <span>${name}</span>
-                                </div>
-                                <div style="font-weight: 600;">
-                                    ${wins} victoria${wins !== 1 ? 's' : ''}
-                                </div>
-                            </div>
-                        `;
-                    })
-                    .join('');
-            }
 
-            hideWinner() {
-                document.getElementById('winnerModal').style.display = 'none';
-            }
+                const sortedLeaderboard = Array.from(this.leaderboard.entries())
+                    .map(([name, data]) => ({ name, ...data }))
+                    .sort((a, b) => {
+                        if (b.wins !== a.wins) return b.wins - a.wins;
+                        return a.avgSpeed - b.avgSpeed;
+                    });
 
-            resetRace() {
-                if (this.raceActive) {
-                    this.stopRace();
-                }
-                
-                this.raceCount = 0;
-                this.leaderboard.clear();
-                this.positions = [];
-                
-                // Resetear wins de jugadores
-                this.players.forEach(player => {
-                    player.wins = 0;
+                leaderboardList.innerHTML = '';
+                sortedLeaderboard.forEach((data, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'leaderboard-item';
+                    if (index === 0) item.classList.add('first');
+                    else if (index === 1) item.classList.add('second');
+                    else if (index === 2) item.classList.add('third');
+
+                    let medal = '';
+                    if (index === 0) medal = '🥇';
+                    else if (index === 1) medal = '🥈';
+                    else if (index === 2) medal = '🥉';
+
+                    const player = this.players.find(p => p.name === data.name) || this.winners.find(p => p.name === data.name);
+                    const horseEmoji = player ? `<span style="color:${player.color};">${player.horse}</span>` : '🏇';
+
+                    item.innerHTML = `
+                        <div class="player-rank">
+                            <span class="rank-medal">${medal}</span>
+                            <span>${horseEmoji} ${data.name}</span>
+                        </div>
+                        <div>
+                            <strong>Victorias:</strong> ${data.wins} |
+                            <strong>Carreras:</strong> ${data.races} |
+                            <strong>Tiempo Promedio:</strong> ${data.avgSpeed.toFixed(2)}s
+                        </div>
+                    `;
+                    leaderboardList.appendChild(item);
                 });
-                
-                document.getElementById('raceTrack').innerHTML = `
-                    <div class="finish-line"></div>
-                    <div style="text-align: center; padding: 50px; color: rgba(255,255,255,0.7);">
-                        <p>Registra participantes para comenzar la carrera</p>
-                    </div>
-                `;
-                
-                this.updateStats();
-                this.updateLeaderboard();
-                this.hideWinner();
-                
-                this.playSound(400, 0.3);
+            }
+
+            saveGameData() {
+                const dataToSave = {
+                    players: this.players,
+                    winners: this.winners,
+                    raceCount: this.raceCount,
+                    leaderboard: Array.from(this.leaderboard.entries())
+                };
+                localStorage.setItem('horseRaceData', JSON.stringify(dataToSave));
+            }
+
+            loadGameData() {
+                const savedData = localStorage.getItem('horseRaceData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    this.players = data.players || [];
+                    this.winners = data.winners || [];
+                    this.raceCount = data.raceCount || 0;
+                    this.leaderboard = new Map(data.leaderboard || []);
+                    this.renderPlayersList();
+                    this.renderLeaderboard();
+                    this.updateStats();
+                    if (this.players.length > 0) {
+                        this.updateRaceStatus('Listo para empezar');
+                    }
+                }
             }
 
             exportData() {
-                if (this.players.length === 0 && this.leaderboard.size === 0) {
-                    alert('No hay datos para exportar');
-                    return;
-                }
-                
-                const data = {
-                    timestamp: new Date().toISOString(),
-                    totalRaces: this.raceCount,
-                    participants: this.players.map(p => ({
-                        name: p.name,
-                        gender: p.gender,
-                        wins: p.wins
-                    })),
-                    leaderboard: [...this.leaderboard.entries()].map(([name, wins]) => ({
-                        name,
-                        wins
-                    }))
+                const dataToExport = {
+                    players: this.players,
+                    winners: this.winners,
+                    totalRacesCompleted: this.raceCount,
+                    leaderboard: Array.from(this.leaderboard.entries()).map(([name, data]) => ({ name, ...data }))
                 };
-                
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const jsonString = JSON.stringify(dataToExport, null, 2);
+                const blob = new Blob([jsonString], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `carreras_${new Date().toISOString().split('T')[0]}.json`;
+                a.download = 'datos_carrera_caballos.json';
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                
-                this.playSound(660, 0.2);
-            }
-
-            toggleSound() {
-                this.soundEnabled = !this.soundEnabled;
-                const button = document.querySelector('.sound-toggle');
-                button.textContent = this.soundEnabled ? '🔊' : '🔇';
-                
-                if (this.soundEnabled && this.audioContext && this.audioContext.state === 'suspended') {
-                    this.audioContext.resume();
-                }
-                
-                this.playSound(440, 0.1);
+                alert('Datos exportados como datos_carrera_caballos.json');
             }
         }
 
-        // Inicializar el juego
-        const game = new ProfessionalHorseRace();
+        // Global instance to make it accessible from HTML
+        const app = new ProfessionalHorseRace();
 
-        // Funciones globales para compatibilidad
-        function addSinglePlayer() { game.addSinglePlayer(); }
-        function addBulkPlayers() { game.addBulkPlayers(); }
-        function startRace() { game.startRace(); }
-        function stopRace() { game.stopRace(); }
-        function resetRace() { game.resetRace(); }
-        function hideWinner() { game.hideWinner(); }
-        function toggleSound() { game.toggleSound(); }
-        function clearAllPlayers() { game.clearAllPlayers(); }
-        function randomizePlayers() { game.randomizePlayers(); }
-        function exportData() { game.exportData(); }
+        // Expose functions to global scope for HTML event handlers
+        function toggleSound() { app.toggleSound(); }
+        function addSinglePlayer() { app.addSinglePlayer(); }
+        function addBulkPlayers() { app.addBulkPlayers(); }
+        function clearAllPlayers() { app.clearAllPlayers(); }
+        function randomizePlayers() { app.randomizePlayers(); }
+        function startRace() { app.startRace(); }
+        function stopRace() { app.stopRace(); }
+        function resetRace() { app.resetRace(); }
+        function hideWinner() { app.hideWinner(); }
+        function exportData() { app.exportData(); }
 
-        // Prevenir zoom en dispositivos móviles
-        document.addEventListener('touchstart', function(e) {
-            if (e.touches.length > 1) {
-                e.preventDefault();
-            }
+        // Initial render calls
+        document.addEventListener('DOMContentLoaded', () => {
+            app.renderPlayersList();
+            app.renderLeaderboard();
         });
-
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(e) {
-            const now = (new Date()).getTime();
-            if (now - lastTouchEnd <= 300) {
-                e.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, false);
     </script>
 </body>
 </html>
