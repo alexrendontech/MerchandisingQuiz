@@ -120,7 +120,7 @@
             color: #333;
         }
 
-        .form-group input:not([type="radio"]), .form-group textarea {
+        .form-group input:not([type="radio"]):not([type="checkbox"]), .form-group textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #e2e8f0;
@@ -129,7 +129,7 @@
             transition: border-color 0.3s ease;
         }
 
-        .form-group input:not([type="radio"]):focus, .form-group textarea:focus {
+        .form-group input:not([type="radio"]):not([type="checkbox"]):focus, .form-group textarea:focus {
             outline: none;
             border-color: #5a67d8;
         }
@@ -147,6 +147,14 @@
         .form-group input.question-image-input:focus {
             outline: none;
             border-color: #5a67d8;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            height: auto;
+            margin-top: 10px;
+            border-radius: 10px;
+            display: none; /* Hidden by default */
         }
 
 
@@ -183,7 +191,7 @@
             border-color: #5a67d8;
         }
 
-        .option-input input[type="radio"] {
+        .option-input input[type="radio"], .option-input input[type="checkbox"] {
             margin-left: 5px;
             transform: scale(1.1);
             cursor: pointer;
@@ -197,6 +205,24 @@
             cursor: pointer;
             margin-bottom: 0;
         }
+
+        /* Styles for open-ended questions */
+        .open-answer-group {
+            display: none; /* Hidden by default */
+        }
+        .open-answer-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        .open-answer-group input:focus {
+            outline: none;
+            border-color: #5a67d8;
+        }
+
 
         .quiz-player {
             text-align: center;
@@ -239,8 +265,65 @@
             gap: 15px;
             margin-bottom: 30px;
         }
+        /* Styles for player options */
+        .player-option {
+            display: flex;
+            align-items: center;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left; /* Align text to left inside the option */
+        }
 
-        .option-btn {
+        .player-option:hover {
+            background: #e2e8f0;
+            transform: scale(1.02);
+        }
+
+        .player-option input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.3); /* Make checkbox larger */
+            accent-color: #5a67d8;
+        }
+
+        .player-option.selected {
+            background: #d1e1f8; /* Light blue when selected */
+            border-color: #5a67d8;
+        }
+
+        .player-option.correct {
+            background: #48bb78;
+            border-color: #48bb78;
+            color: white;
+        }
+
+        .player-option.incorrect {
+            background: #f56565;
+            border-color: #f56565;
+            color: white;
+        }
+
+
+        .open-answer-input-player {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+            box-sizing: border-box; /* Ensures padding doesn't increase total width */
+        }
+        .open-answer-input-player:focus {
+            outline: none;
+            border-color: #5a67d8;
+        }
+
+
+        .option-btn { /* Old style for single select buttons, mostly for reference, replaced by player-option */
             background: #f8fafc;
             border: 2px solid #e2e8f0;
             border-radius: 15px;
@@ -489,6 +572,14 @@
         .admin-quiz-item .btn-delete:hover {
             background: #c82333;
         }
+        /* New style for edit button */
+        .admin-quiz-item .btn-edit {
+            background: #ffc107; /* Amarillo para editar */
+            color: #333;
+        }
+        .admin-quiz-item .btn-edit:hover {
+            background: #e0a800;
+        }
 
         #admin-realtime-results {
             background: #ffffff;
@@ -544,11 +635,14 @@
                     <button class="btn">Girar Ruleta</button>
                 </div>
 
+
                  <div class="menu-card" onclick="window.location.href='carrerajuego.html'">
                     <h3>🎮 Carreras de Caballos</h3>
                     <p>Selecciona un nombre al azar entre los jugadores de tus quizzes.</p>
                     <button class="btn">Gana de Carrera</button>
                 </div>
+
+                
             </div>
         </div>
 
@@ -575,6 +669,31 @@
                 <button class="btn" onclick="saveQuiz()" style="margin-left: 10px;">💾 Guardar Quiz</button>
             </div>
         </div>
+
+        <div id="edit-quiz-screen" class="hidden">
+            <button class="btn back-btn" onclick="showAdminDashboard()">← Volver al Panel Admin</button>
+            
+            <div class="quiz-creation">
+                <h2 id="edit-quiz-title-heading">Editar Cuestionario</h2>
+                
+                <div class="form-group">
+                    <label for="edit-quiz-title">Título del Quiz</label>
+                    <input type="text" id="edit-quiz-title" placeholder="Ej: Historia de Colombia">
+                </div>
+                
+                <div class="form-group">
+                    <label for="edit-quiz-description">Descripción</label>
+                    <textarea id="edit-quiz-description" placeholder="Describe de qué trata tu cuestionario..." rows="3"></textarea>
+                </div>
+                
+                <div id="edit-questions-container">
+                    </div>
+                
+                <button class="btn" onclick="addQuestion('edit')">+ Agregar Pregunta</button>
+                <button class="btn" id="update-quiz-btn" onclick="updateQuiz()" style="margin-left: 10px;">✅ Actualizar Quiz</button>
+            </div>
+        </div>
+
 
         <div id="quiz-list-screen" class="hidden">
             <button class="btn back-btn" onclick="showMainScreen()">← Volver</button>
@@ -610,11 +729,15 @@
                     </div>
                     
                     <div class="question-number" id="question-number">Pregunta 1 de 5</div>
-                    <div class="question-text" id="current-question">¿Cuál es la capital de Colombia?</div>
+                    <div class="question-text" id="current-question"></div>
                     
                     <div class="options-grid" id="options-container">
                         </div>
+                    <div id="open-answer-container-player" class="hidden">
+                        <input type="text" id="open-answer-input-player" class="open-answer-input-player" placeholder="Escribe tu respuesta aquí...">
+                    </div>
                     
+                    <button class="btn" id="submit-answer-btn" onclick="submitAnswer()">Enviar Respuesta</button>
                     <button class="btn" id="next-btn" onclick="nextQuestion()" style="display: none;">Siguiente Pregunta</button>
                     <div id="feedback-message" class="hidden"></div>
                 </div>
@@ -700,6 +823,7 @@
         window.playerName = ''; 
         window.realtimeListenerRef = null; 
         window.currentPlayerId = null; // Variable para el ID de la sesión del jugador actual
+        window.editingQuizId = null; // New: To store the ID of the quiz being edited
         
         // Funciones para mostrar/ocultar pantallas
         window.showMainScreen = function() {
@@ -717,23 +841,67 @@
             localStorage.removeItem('currentQuiz');
             localStorage.removeItem('currentPlayerId');
             localStorage.removeItem('currentPlayerName');
-            // Resetear variables globales del jugador
+            // Resetear variables globales del jugador y edición
             window.currentQuiz = null;
             window.currentQuizId = null;
             window.currentQuestionIndex = 0;
             window.score = 0;
             window.playerName = ''; 
             window.currentPlayerId = null; 
+            window.editingQuizId = null; // Reset editing state
         };
 
         window.showCreateQuiz = function() {
             hideAllScreens();
             stopRealtimeUpdates();
             document.getElementById('create-quiz-screen').classList.remove('hidden');
-            if (document.getElementById('questions-container').children.length === 0) {
-                addQuestion();
+            document.getElementById('quiz-title').value = ''; // Clear form
+            document.getElementById('quiz-description').value = '';
+            document.getElementById('questions-container').innerHTML = '';
+            window.questionCounter = 0;
+            addQuestion(); // Add first empty question
+        };
+
+        // New function to show edit quiz screen
+        window.showEditQuiz = async function(quizId) {
+            hideAllScreens();
+            stopRealtimeUpdates();
+            document.getElementById('edit-quiz-screen').classList.remove('hidden');
+            window.editingQuizId = quizId; // Set the quiz ID being edited
+            document.getElementById('update-quiz-btn').onclick = updateQuiz; // Ensure the update function is set
+
+            try {
+                const quizRef = ref(database, `quizzes/${quizId}`);
+                const snapshot = await get(quizRef);
+                if (snapshot.exists()) {
+                    const quizData = snapshot.val();
+                    document.getElementById('edit-quiz-title').value = quizData.title;
+                    document.getElementById('edit-quiz-description').value = quizData.description;
+                    document.getElementById('edit-quiz-title-heading').textContent = `Editar Quiz: ${quizData.title}`;
+
+                    const questionsContainer = document.getElementById('edit-questions-container');
+                    questionsContainer.innerHTML = ''; // Clear existing questions
+                    window.questionCounter = 0; // Reset question counter for editing
+
+                    quizData.questions.forEach(q => {
+                        addQuestion('edit', q); // Pass 'edit' mode and existing question data
+                    });
+                    // If no questions are present, add one empty
+                    if (quizData.questions.length === 0) {
+                        addQuestion('edit');
+                    }
+
+                } else {
+                    alert('Quiz no encontrado para editar.');
+                    showAdminDashboard();
+                }
+            } catch (error) {
+                console.error('Error al cargar quiz para edición:', error);
+                alert('Error al cargar quiz para edición: ' + error.message);
+                showAdminDashboard();
             }
         };
+
 
         window.showQuizList = function() {
             hideAllScreens();
@@ -774,16 +942,18 @@
         };
 
         function hideAllScreens() {
-            const screens = ['main-screen', 'create-quiz-screen', 'quiz-list-screen', 'start-quiz-pre-player-screen', 'quiz-player-screen', 'results-screen', 'quiz-player-results-screen', 'admin-dashboard-screen'];
+            const screens = ['main-screen', 'create-quiz-screen', 'edit-quiz-screen', 'quiz-list-screen', 'start-quiz-pre-player-screen', 'quiz-player-screen', 'results-screen', 'quiz-player-results-screen', 'admin-dashboard-screen'];
             screens.forEach(screen => {
                 document.getElementById(screen).classList.add('hidden');
             });
         }
 
-        // Funciones para la creación de Quizzes
-        window.addQuestion = function() {
-            const container = document.getElementById('questions-container');
-            const newQuestionIndex = window.questionCounter;
+        // Funciones para la creación y EDICIÓN de Quizzes
+        window.addQuestion = function(mode = 'create', questionData = null) {
+            const container = mode === 'create' ? document.getElementById('questions-container') : document.getElementById('edit-questions-container');
+            const currentQuestionCount = container.children.length; // Use actual children count for new index
+            const newQuestionIndex = currentQuestionCount;
+            
             const questionBlock = document.createElement('div');
             questionBlock.className = 'question-block';
             questionBlock.innerHTML = `
@@ -796,79 +966,159 @@
                 <div class="form-group">
                     <label>URL de Imagen (Opcional)</label>
                     <input type="text" class="question-image-input" placeholder="Pega la URL de una imagen aquí (ej: https://ejemplo.com/imagen.jpg)">
+                    <img class="image-preview" src="" alt="Vista previa de imagen" style="display:none;">
                 </div>
 
                 <div class="form-group">
-                    <label>Opciones de respuesta</label>
+                    <label>
+                        <input type="checkbox" class="is-open-question"> Esta es una pregunta de respuesta abierta
+                    </label>
+                </div>
+
+                <div class="form-group open-answer-group" style="display: none;">
+                    <label>Respuesta esperada (para preguntas abiertas)</label>
+                    <input type="text" class="open-answer-input" placeholder="Ej: La capital es Bogotá">
+                </div>
+
+                <div class="form-group options-group">
+                    <label>Opciones de respuesta (marca una o más como correctas)</label>
                     <div class="option-input">
                         <input type="text" class="option-text-input" placeholder="Opción A">
-                        <input type="radio" name="correct-${newQuestionIndex}" value="0" id="correct-${newQuestionIndex}-0">
-                        <label for="correct-${newQuestionIndex}-0">Correcta</label>
+                        <input type="checkbox" class="correct-answer-checkbox" value="0">
+                        <label>Correcta</label>
                     </div>
                     <div class="option-input">
                         <input type="text" class="option-text-input" placeholder="Opción B">
-                        <input type="radio" name="correct-${newQuestionIndex}" value="1" id="correct-${newQuestionIndex}-1">
-                        <label for="correct-${newQuestionIndex}-1">Correcta</label>
+                        <input type="checkbox" class="correct-answer-checkbox" value="1">
+                        <label>Correcta</label>
                     </div>
                     <div class="option-input">
                         <input type="text" class="option-text-input" placeholder="Opción C">
-                        <input type="radio" name="correct-${newQuestionIndex}" value="2" id="correct-${newQuestionIndex}-2">
-                        <label for="correct-${newQuestionIndex}-2">Correcta</label>
+                        <input type="checkbox" class="correct-answer-checkbox" value="2">
+                        <label>Correcta</label>
                     </div>
                     <div class="option-input">
                         <input type="text" class="option-text-input" placeholder="Opción D">
-                        <input type="radio" name="correct-${newQuestionIndex}" value="3" id="correct-${newQuestionIndex}-3">
-                        <label for="correct-${newQuestionIndex}-3">Correcta</label>
+                        <input type="checkbox" class="correct-answer-checkbox" value="3">
+                        <label>Correcta</label>
                     </div>
                 </div>
-                <button class="btn" onclick="removeQuestion(this)" style="background: #f56565;">Eliminar Pregunta</button>
+                <button class="btn" onclick="removeQuestion(this, '${mode}')" style="background: #f56565;">Eliminar Pregunta</button>
             `;
             container.appendChild(questionBlock);
-            window.questionCounter++;
+            
+            // Populate if questionData is provided (for editing)
+            if (questionData) {
+                questionBlock.querySelector('.question-text-input').value = questionData.question || '';
+                questionBlock.querySelector('.question-image-input').value = questionData.image || '';
+                
+                const previewImg = questionBlock.querySelector('.image-preview');
+                if (questionData.image) {
+                    previewImg.src = questionData.image;
+                    previewImg.style.display = 'block';
+                }
+
+                const openCheckbox = questionBlock.querySelector('.is-open-question');
+                const openAnswerGroup = questionBlock.querySelector('.open-answer-group');
+                const openAnswerInput = questionBlock.querySelector('.open-answer-input');
+                const optionsGroup = questionBlock.querySelector('.options-group');
+                
+                if (questionData.isOpen) {
+                    openCheckbox.checked = true;
+                    openAnswerGroup.style.display = 'block';
+                    openAnswerInput.value = questionData.openAnswer || '';
+                    optionsGroup.style.display = 'none';
+                } else {
+                    openCheckbox.checked = false;
+                    openAnswerGroup.style.display = 'none';
+                    optionsGroup.style.display = 'block';
+                    
+                    const optionTextInputs = questionBlock.querySelectorAll('.option-text-input');
+                    const correctAnswerCheckboxes = questionBlock.querySelectorAll('.correct-answer-checkbox');
+                    
+                    questionData.options.forEach((opt, idx) => {
+                        if (optionTextInputs[idx]) {
+                            optionTextInputs[idx].value = opt;
+                        }
+                    });
+
+                    (questionData.correctAnswers || []).forEach(correctIdx => {
+                        if (correctAnswerCheckboxes[correctIdx]) {
+                            correctAnswerCheckboxes[correctIdx].checked = true;
+                        }
+                    });
+                }
+            }
+
+            // Logic for image preview
+            const imageInput = questionBlock.querySelector('.question-image-input');
+            const previewImg = questionBlock.querySelector('.image-preview');
+            imageInput.addEventListener('input', () => {
+                previewImg.src = imageInput.value.trim();
+                previewImg.style.display = imageInput.value.trim() ? 'block' : 'none';
+            });
+
+            // Logic for open-ended questions
+            const openCheckbox = questionBlock.querySelector('.is-open-question');
+            const openAnswerGroup = questionBlock.querySelector('.open-answer-group');
+            const optionsGroup = questionBlock.querySelector('.options-group');
+
+            openCheckbox.addEventListener('change', () => {
+                if (openCheckbox.checked) {
+                    openAnswerGroup.style.display = 'block';
+                    optionsGroup.style.display = 'none';
+                    // Clear multiple choice inputs if switching to open
+                    optionsGroup.querySelectorAll('input[type="text"]').forEach(input => input.value = '');
+                    optionsGroup.querySelectorAll('input[type="checkbox"]').forEach(input => input.checked = false);
+
+                } else {
+                    openAnswerGroup.style.display = 'none';
+                    optionsGroup.style.display = 'block';
+                    // Clear open answer input if switching back
+                    openAnswerGroup.querySelector('.open-answer-input').value = '';
+                }
+            });
         };
 
-        window.removeQuestion = function(button) {
+        window.removeQuestion = function(button, mode = 'create') {
             button.parentElement.remove();
-            const questionBlocks = document.querySelectorAll('.question-block');
+            const container = mode === 'create' ? document.getElementById('questions-container') : document.getElementById('edit-questions-container');
+            const questionBlocks = container.querySelectorAll('.question-block');
             questionBlocks.forEach((block, index) => {
                 block.querySelector('h3').textContent = `Pregunta ${index + 1}`;
-                const radioInputs = block.querySelectorAll('input[type="radio"]');
-                radioInputs.forEach(radio => {
-                    radio.name = `correct-${index}`;
-                    radio.id = `correct-${index}-${radio.value}`;
-                });
-                block.querySelectorAll('label').forEach(label => {
-                    label.htmlFor = `correct-${index}-${label.htmlFor.split('-')[2]}`;
-                });
+                // No need to adjust checkbox IDs if they are not used with specific `id` attributes or `for` labels anymore within this structure
             });
-            window.questionCounter--; 
         };
 
-        window.saveQuiz = function() {
-            const title = document.getElementById('quiz-title').value.trim();
-            const description = document.getElementById('quiz-description').value.trim();
+        // Helper function to extract quiz data from form
+        function getQuizDataFromForm(mode = 'create') {
+            const titleInput = mode === 'create' ? document.getElementById('quiz-title') : document.getElementById('edit-quiz-title');
+            const descriptionInput = mode === 'create' ? document.getElementById('quiz-description') : document.getElementById('edit-quiz-description');
+            const questionsContainer = mode === 'create' ? document.getElementById('questions-container') : document.getElementById('edit-questions-container');
+
+            const title = titleInput.value.trim();
+            const description = descriptionInput.value.trim();
             
             if (!title) {
                 alert('Por favor ingresa un título para el quiz.');
-                return;
+                return null;
             }
 
             const questions = [];
-            const questionBlocks = document.querySelectorAll('#questions-container .question-block');
+            const questionBlocks = questionsContainer.querySelectorAll('.question-block');
             
             if (questionBlocks.length === 0) {
                 alert('Por favor agrega al menos una pregunta.');
-                return;
+                return null;
             }
 
             let allQuestionsValid = true;
             
             questionBlocks.forEach((block, index) => {
                 const questionText = block.querySelector('.question-text-input').value.trim(); 
-                const questionImage = block.querySelector('.question-image-input').value.trim(); // Get image URL
-                const optionInputs = block.querySelectorAll('.option-text-input'); 
-                const options = Array.from(optionInputs).map(input => input.value.trim());
-                const correctAnswerInput = block.querySelector(`input[name="correct-${index}"]:checked`);
+                const questionImage = block.querySelector('.question-image-input').value.trim();
+                const isOpenQuestion = block.querySelector('.is-open-question').checked;
+                const openAnswerInput = block.querySelector('.open-answer-input');
                 
                 if (!questionText) {
                     alert(`La Pregunta ${index + 1} no tiene texto.`);
@@ -876,55 +1126,111 @@
                     return; 
                 }
 
-                if (options.some(opt => !opt)) {
-                    alert(`La Pregunta ${index + 1} tiene opciones de respuesta vacías.`);
-                    allQuestionsValid = false;
-                    return;
-                }
-
-                if (!correctAnswerInput) {
-                    alert(`La Pregunta ${index + 1} no tiene una respuesta correcta seleccionada.`);
-                    allQuestionsValid = false;
-                    return;
-                }
-                
-                questions.push({
+                let questionData = {
                     question: questionText,
-                    image: questionImage, // Include the image URL
-                    options: options,
-                    correctAnswer: parseInt(correctAnswerInput.value)
-                });
+                    image: questionImage,
+                    isOpen: isOpenQuestion
+                };
+
+                if (isOpenQuestion) {
+                    const openAnswer = openAnswerInput.value.trim();
+                    if (!openAnswer) {
+                        alert(`La Pregunta ${index + 1} es de respuesta abierta pero no tiene una respuesta esperada.`);
+                        allQuestionsValid = false;
+                        return;
+                    }
+                    questionData.openAnswer = openAnswer;
+                } else {
+                    const optionInputs = block.querySelectorAll('.option-text-input'); 
+                    const options = Array.from(optionInputs).map(input => input.value.trim());
+                    const correctAnswerCheckboxes = block.querySelectorAll('.correct-answer-checkbox:checked');
+                    const correctAnswers = Array.from(correctAnswerCheckboxes).map(input => parseInt(input.value));
+                    
+                    if (options.some(opt => !opt)) {
+                        alert(`La Pregunta ${index + 1} tiene opciones de respuesta vacías.`);
+                        allQuestionsValid = false;
+                        return;
+                    }
+
+                    if (correctAnswers.length === 0) {
+                        alert(`La Pregunta ${index + 1} de opción múltiple no tiene una respuesta correcta seleccionada.`);
+                        allQuestionsValid = false;
+                        return;
+                    }
+                    questionData.options = options;
+                    questionData.correctAnswers = correctAnswers;
+                }
+                questions.push(questionData);
             });
 
             if (!allQuestionsValid) {
-                return; 
+                return null; 
             }
 
+            return { title, description, questions };
+        }
+
+        window.saveQuiz = async function() {
+            const quizData = getQuizDataFromForm('create');
+            if (!quizData) return;
+
             const quizCode = generateQuizCode();
-            const quizData = {
-                title,
-                description,
-                questions,
-                code: quizCode,
-                createdAt: new Date().toISOString()
-            };
+            quizData.code = quizCode;
+            quizData.createdAt = new Date().toISOString();
 
             const quizzesRef = ref(database, 'quizzes');
             const newQuizRef = push(quizzesRef);
             
-            set(newQuizRef, quizData).then(() => {
+            try {
+                await set(newQuizRef, quizData);
                 alert(`¡Quiz guardado exitosamente! Comparte este código: ${quizCode}`);
                 showMainScreen();
+                // Clear form after saving
                 document.getElementById('quiz-title').value = '';
                 document.getElementById('quiz-description').value = '';
                 document.getElementById('questions-container').innerHTML = '';
                 window.questionCounter = 0; 
                 addQuestion(); 
-            }).catch(error => {
+            } catch (error) {
                 console.error('Error al guardar:', error);
                 alert('Error al guardar el quiz: ' + error.message);
-            });
+            }
         };
+
+        window.updateQuiz = async function() {
+            if (!window.editingQuizId) {
+                alert('No hay quiz seleccionado para actualizar.');
+                return;
+            }
+
+            const quizData = getQuizDataFromForm('edit');
+            if (!quizData) return;
+
+            const quizRef = ref(database, `quizzes/${window.editingQuizId}`);
+            
+            try {
+                // Fetch current quiz to retain the code
+                const snapshot = await get(quizRef);
+                if (!snapshot.exists()) {
+                    alert('El quiz que intentas actualizar no existe.');
+                    showAdminDashboard();
+                    return;
+                }
+                const existingQuiz = snapshot.val();
+                
+                quizData.code = existingQuiz.code; // Retain the existing code
+                quizData.updatedAt = new Date().toISOString(); // Add an updated timestamp
+
+                await set(quizRef, quizData); // Overwrite with updated data
+                alert(`¡Quiz actualizado exitosamente!`);
+                window.editingQuizId = null; // Clear editing state
+                showAdminDashboard();
+            } catch (error) {
+                console.error('Error al actualizar:', error);
+                alert('Error al actualizar el quiz: ' + error.message);
+            }
+        };
+
 
         function generateQuizCode() {
             return Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -1035,7 +1341,7 @@
                     window.currentQuizId = quizId; 
                     window.currentQuestionIndex = 0;
                     window.score = 0;
-                    window.playerAnswers = [];
+                    window.playerAnswers = []; // This will store selected options for MCQs or text for open
                     
                     hideAllScreens();
                     document.getElementById('quiz-player-screen').classList.remove('hidden');
@@ -1063,7 +1369,12 @@
 
             const question = window.currentQuiz.questions[window.currentQuestionIndex];
             const questionTextElement = document.getElementById('current-question');
-            
+            const optionsContainer = document.getElementById('options-container');
+            const openAnswerContainerPlayer = document.getElementById('open-answer-container-player');
+            const openAnswerInputPlayer = document.getElementById('open-answer-input-player');
+            const submitAnswerBtn = document.getElementById('submit-answer-btn');
+            const nextBtn = document.getElementById('next-btn');
+
             questionTextElement.textContent = question.question; // Set the question text
 
             // Clear any previous image
@@ -1083,28 +1394,46 @@
             document.getElementById('question-number').textContent = 
                 `Pregunta ${window.currentQuestionIndex + 1} de ${window.currentQuiz.questions.length}`;
             
-            const optionsContainer = document.getElementById('options-container');
             optionsContainer.innerHTML = '';
-            
-            question.options.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.className = 'option-btn';
-                button.textContent = option;
-                button.onclick = () => selectOption(index, button);
-                optionsContainer.appendChild(button);
-            });
+            openAnswerContainerPlayer.classList.add('hidden');
+            submitAnswerBtn.style.display = 'block'; // Always show submit button, it will be handled by logic
+            nextBtn.style.display = 'none';
 
-            document.querySelectorAll('.option-btn').forEach(btn => {
-                btn.disabled = false;
-                btn.classList.remove('correct', 'incorrect', 'selected');
-            });
+            if (question.isOpen) {
+                openAnswerContainerPlayer.classList.remove('hidden');
+                openAnswerInputPlayer.value = '';
+                openAnswerInputPlayer.disabled = false; // Enable input for typing
+                submitAnswerBtn.onclick = () => submitOpenAnswer(); // Set specific submit for open
+            } else {
+                openAnswerInputPlayer.disabled = true; // Disable if not an open question
+                question.options.forEach((option, index) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'player-option';
+                    optionDiv.innerHTML = `
+                        <input type="checkbox" id="option-${index}" value="${index}">
+                        <label for="option-${index}">${option}</label>
+                    `;
+                    optionsContainer.appendChild(optionDiv);
+
+                    // Add click listener to the entire div to toggle checkbox
+                    optionDiv.addEventListener('click', () => {
+                        const checkbox = optionDiv.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                        optionDiv.classList.toggle('selected', checkbox.checked);
+                    });
+
+                    // Prevent click on label/checkbox from triggering div's click listener twice
+                    optionDiv.querySelector('input[type="checkbox"]').addEventListener('click', (e) => e.stopPropagation());
+                    optionDiv.querySelector('label').addEventListener('click', (e) => e.stopPropagation());
+                });
+                submitAnswerBtn.onclick = () => submitMultipleChoiceAnswer(); // Set specific submit for MC
+            }
 
             const progress = ((window.currentQuestionIndex) / window.currentQuiz.questions.length) * 100;
             document.getElementById('progress-fill').style.width = progress + '%';
             
             startTimer();
             
-            document.getElementById('next-btn').style.display = 'none';
             // Ocultar y limpiar el feedback message al mostrar una nueva pregunta
             const feedbackMessage = document.getElementById('feedback-message');
             feedbackMessage.classList.remove('show', 'correct', 'incorrect');
@@ -1121,19 +1450,23 @@
                 
                 if (window.timeLeft <= 0) {
                     clearInterval(window.timer);
-                    window.playerAnswers.push(null); 
                     const question = window.currentQuiz.questions[window.currentQuestionIndex];
-                    document.querySelectorAll('.option-btn').forEach((btn, idx) => {
-                        btn.disabled = true;
-                        if (idx === question.correctAnswer) {
-                            btn.classList.add('correct');
-                        }
-                    });
+
+                    if (question.isOpen) {
+                        // For open questions, consider it incorrect if not submitted
+                        document.getElementById('open-answer-input-player').disabled = true;
+                        window.playerAnswers.push({ answer: document.getElementById('open-answer-input-player').value.trim(), isCorrect: false });
+                        document.getElementById('submit-answer-btn').style.display = 'none';
+                    } else {
+                        // For multiple choice, mark answers and disable options
+                        const selectedOptions = []; // Empty array as no answer submitted
+                        markMultipleChoiceAnswers(selectedOptions, question.correctAnswers);
+                        window.playerAnswers.push(selectedOptions); // Store empty selected answers
+                        document.querySelectorAll('.player-option input[type="checkbox"]').forEach(cb => cb.disabled = true);
+                    }
                     
-                    // **MEJORADO: Mensaje de tiempo agotado**
                     showFeedbackMessage('¡Tiempo agotado! ⌛', 'incorrect');
 
-                    // Actualizar el score del jugador en Firebase (si no se ha respondido)
                     if (window.currentPlayerId && window.currentQuizId) {
                         const playerSessionRef = ref(database, `sessions/${window.currentQuizId}/players/${window.currentPlayerId}`);
                         update(playerSessionRef, {
@@ -1151,28 +1484,17 @@
             }, 1000);
         }
 
-        function selectOption(selectedIndex, selectedButton) {
-            clearInterval(window.timer); 
-            
+        window.submitOpenAnswer = function() {
+            clearInterval(window.timer);
             const question = window.currentQuiz.questions[window.currentQuestionIndex];
-            const isCorrect = selectedIndex === question.correctAnswer;
-            
-            const optionButtons = document.querySelectorAll('.option-btn');
-            optionButtons.forEach(btn => {
-                btn.disabled = true;
-            });
+            const openAnswerInputPlayer = document.getElementById('open-answer-input-player');
+            const userAnswer = openAnswerInputPlayer.value.trim();
+            const correctAnswer = question.openAnswer.trim();
 
-            optionButtons.forEach((btn, index) => {
-                if (index === question.correctAnswer) {
-                    btn.classList.add('correct');
-                } else if (index === selectedIndex && !isCorrect) {
-                    btn.classList.add('incorrect');
-                }
-            });
+            const isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
 
             if (isCorrect) {
                 window.score++;
-                // **MEJORADO: Mensaje y animación de correcto**
                 const correctMessages = [
                     "¡Correcto! Eres un genio 🎉",
                     "¡Increíble! Acertaste 💪",
@@ -1182,7 +1504,6 @@
                 const randomCorrectMessage = correctMessages[Math.floor(Math.random() * correctMessages.length)];
                 showFeedbackMessage(randomCorrectMessage, 'correct');
             } else {
-                // **MEJORADO: Mensaje y animación de incorrecto**
                 const incorrectMessages = [
                     "¡Oops! Inténtalo de nuevo. La práctica hace al maestro 🧠",
                     "Casi lo logras. ¡No te preocupes! 🌟",
@@ -1190,12 +1511,12 @@
                     "No te rindas. ¡Estás cerca de dominarlo! 🚀"
                 ];
                 const randomIncorrectMessage = incorrectMessages[Math.floor(Math.random() * incorrectMessages.length)];
-                showFeedbackMessage(randomIncorrectMessage, 'incorrect');
+                showFeedbackMessage(randomIncorrectMessage + ` (La respuesta era: ${correctAnswer})`, 'incorrect');
             }
-            
-            window.playerAnswers.push(selectedIndex);
 
-            // Actualizar el score del jugador en tiempo real en Firebase
+            window.playerAnswers.push({ answer: userAnswer, isCorrect: isCorrect });
+
+            // Update score in Firebase
             if (window.currentPlayerId && window.currentQuizId) {
                 const playerSessionRef = ref(database, `sessions/${window.currentQuizId}/players/${window.currentPlayerId}`);
                 update(playerSessionRef, {
@@ -1205,11 +1526,84 @@
                     console.error('Error al actualizar score de jugador:', error);
                 });
             }
-            
-            setTimeout(() => {
-                document.getElementById('next-btn').style.display = 'block';
-            }, 1500); 
+
+            openAnswerInputPlayer.disabled = true; // Disable input after submitting
+            document.getElementById('submit-answer-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'block';
+        };
+
+        window.submitMultipleChoiceAnswer = function() {
+            clearInterval(window.timer);
+            const question = window.currentQuiz.questions[window.currentQuestionIndex];
+            const selectedCheckboxes = document.querySelectorAll('#options-container input[type="checkbox"]:checked');
+            const selectedIndices = Array.from(selectedCheckboxes).map(cb => parseInt(cb.value));
+
+            // Disable all checkboxes after submission
+            document.querySelectorAll('#options-container input[type="checkbox"]').forEach(cb => cb.disabled = true);
+
+            // Determine if the answer is correct
+            // An answer is correct if selectedIndices exactly matches correctAnswers (order doesn't matter)
+            const isCorrect = selectedIndices.length === question.correctAnswers.length &&
+                              selectedIndices.every(index => question.correctAnswers.includes(index));
+
+            if (isCorrect) {
+                window.score++;
+                const correctMessages = [
+                    "¡Correcto! Eres un genio 🎉",
+                    "¡Increíble! Acertaste 💪",
+                    "¡Perfecto! Sigue así ✨",
+                    "¡Lo lograste! Fantástico 💯"
+                ];
+                const randomCorrectMessage = correctMessages[Math.floor(Math.random() * correctMessages.length)];
+                showFeedbackMessage(randomCorrectMessage, 'correct');
+            } else {
+                const incorrectMessages = [
+                    "¡Oops! Inténtalo de nuevo. La práctica hace al maestro 🧠",
+                    "Casi lo logras. ¡No te preocupes! 🌟",
+                    "Esa no era. ¡Sigue intentando! Siempre hay una nueva oportunidad 👍",
+                    "No te rindas. ¡Estás cerca de dominarlo! 🚀"
+                ];
+                const randomIncorrectMessage = incorrectMessages[Math.floor(Math.random() * incorrectMessages.length)];
+                showFeedbackMessage(randomIncorrectMessage, 'incorrect');
+            }
+
+            // Mark correct/incorrect options visually
+            markMultipleChoiceAnswers(selectedIndices, question.correctAnswers);
+
+            window.playerAnswers.push(selectedIndices); // Store the selected indices
+
+            // Update score in Firebase
+            if (window.currentPlayerId && window.currentQuizId) {
+                const playerSessionRef = ref(database, `sessions/${window.currentQuizId}/players/${window.currentPlayerId}`);
+                update(playerSessionRef, {
+                    score: window.score,
+                    lastAnswerTime: Date.now()
+                }).catch(error => {
+                    console.error('Error al actualizar score de jugador:', error);
+                });
+            }
+
+            document.getElementById('submit-answer-btn').style.display = 'none';
+            document.getElementById('next-btn').style.display = 'block';
+        };
+
+        function markMultipleChoiceAnswers(selectedIndices, correctAnswers) {
+            const optionElements = document.querySelectorAll('#options-container .player-option');
+            optionElements.forEach((optionDiv, index) => {
+                const checkbox = optionDiv.querySelector('input[type="checkbox"]');
+                const isCorrectOption = correctAnswers.includes(index);
+                const isSelected = selectedIndices.includes(index);
+
+                if (isCorrectOption) {
+                    optionDiv.classList.add('correct'); // Mark all truly correct options
+                } else if (isSelected && !isCorrectOption) {
+                    optionDiv.classList.add('incorrect'); // Mark selected, but incorrect options
+                }
+                // If an option was selected and correct, it will already be marked 'correct'
+                // If an option was not selected and incorrect, no class is added
+            });
         }
+
 
         // **MEJORADO: Función para mostrar el mensaje de retroalimentación**
         function showFeedbackMessage(message, type) {
@@ -1301,7 +1695,7 @@
                     Object.values(players).forEach(player => {
                         // Solo considerar jugadores que han terminado el quiz y tienen totalQuestions
                         if (player.isFinished && player.totalQuestions !== undefined && player.totalQuestions !== null) { 
-                            // Si ya existe un resultado para este nombre, actualizar si el actual es más reciente/mejor
+                            // If a result already exists for this name, update if the current one is more recent/better
                             if (!processedPlayers[player.name] || 
                                 (player.score > processedPlayers[player.name].score) ||
                                 (player.score === processedPlayers[player.name].score && new Date(player.timestamp) > new Date(processedPlayers[player.name].timestamp))
@@ -1398,6 +1792,9 @@
                                     <p>Código: <strong>${quiz.code}</strong> • Preguntas: ${quiz.questions.length}</p>
                                 </div>
                                 <div>
+                                    <button class="btn btn-edit" onclick="showEditQuiz('${id}')">
+                                        Editar Quiz
+                                    </button>
                                     <button class="btn" onclick="startRealtimeMonitor('${id}', '${quiz.title.replace(/'/g, "\\'")}')">
                                         Ver Resultados en Vivo
                                     </button>
@@ -1609,10 +2006,13 @@
 
         // Inicializar la aplicación al cargar el DOM
         document.addEventListener('DOMContentLoaded', function() {
-            if (document.getElementById('questions-container').children.length === 0) {
-                addQuestion();
+            // Check if the current screen should be `create-quiz-screen` and add first question
+            if (document.getElementById('create-quiz-screen').classList.contains('hidden') === false) {
+                 if (document.getElementById('questions-container').children.length === 0) {
+                    addQuestion('create');
+                }
             }
-
+           
             // LÓGICA PARA MANEJAR LA REDIRECCIÓN DESDE join_quiz.html o iniciar juego directo
             const urlParams = new URLSearchParams(window.location.search);
             const screenParam = urlParams.get('screen');
