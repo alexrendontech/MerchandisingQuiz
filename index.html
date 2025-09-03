@@ -1144,12 +1144,12 @@
                     const correctAnswerCheckboxes = block.querySelectorAll('.correct-answer-checkbox:checked');
                     const correctAnswers = Array.from(correctAnswerCheckboxes).map(input => parseInt(input.value));
                     
-                    if (options.some(opt => !opt)) {
-                        alert(`La Pregunta ${index + 1} tiene opciones de respuesta vacías.`);
-                        allQuestionsValid = false;
-                        return;
-                    }
-
+                   const filledOptions = options.filter(opt => opt);
+if (filledOptions.length < 2) {
+    alert(`La Pregunta ${index + 1} debe tener al menos dos opciones llenas.`);
+    allQuestionsValid = false;
+    return;
+}
                     if (correctAnswers.length === 0) {
                         alert(`La Pregunta ${index + 1} de opción múltiple no tiene una respuesta correcta seleccionada.`);
                         allQuestionsValid = false;
