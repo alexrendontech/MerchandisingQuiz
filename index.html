@@ -722,7 +722,7 @@
         <div id="quiz-player-screen" class="hidden">
             <div class="quiz-player">
                 <div class="question-card">
-                    <div class="timer" id="timer">30</div>
+                    <div class="timer" id="timer">90</div>
                     
                     <div class="progress-bar">
                         <div class="progress-fill" id="progress-fill"></div>
@@ -821,7 +821,7 @@
         window.currentQuestionIndex = 0;
         window.score = 0;
         window.timer = null;
-        window.timeLeft = 30;
+        window.timeLeft = 90;
         window.playerAnswers = [];
         window.questionCounter = 0; 
         window.playerName = ''; 
@@ -1474,7 +1474,7 @@ if (filledOptions.length < 2) {
         }
 
         function startTimer() {
-            window.timeLeft = 30; 
+            window.timeLeft = 90; 
             document.getElementById('timer').textContent = window.timeLeft;
             
             window.timer = setInterval(() => {
