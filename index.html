@@ -596,7 +596,60 @@
             font-size: 1.8rem;
             text-align: center;
         }
+        
+        /* Estilos para controles de paginación */
+        #pagination-controls {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        #pagination-controls button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            min-width: 100px;
+        }
+        
+        #page-info {
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            padding: 0 15px;
+        }
+        
+        #pagination-controls label,
+        #pagination-controls span {
+            color: white;
+        }
+        
+        #items-per-page {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 2px solid white;
+            background: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        @media (max-width: 768px) {
+            #pagination-controls {
+                flex-direction: column;
+            }
+            
+            #pagination-controls button {
+                width: 100%;
+                max-width: 200px;
+            }
+        }
     </style>
+    
+    <!-- SheetJS library for Excel export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
     <div class="container">
@@ -780,8 +833,39 @@
                     <div id="admin-results-table-container">
                         <p>Esperando datos de jugadores...</p>
                     </div>
+                    
+                    <!-- Controles de paginación -->
+                    <div id="pagination-controls" style="display: none; margin: 20px 0; text-align: center;">
+                        <button class="btn" onclick="changePage('first')" style="background: #6366f1; margin: 5px;">
+                            ⏮️ Primera
+                        </button>
+                        <button class="btn" onclick="changePage('prev')" style="background: #6366f1; margin: 5px;">
+                            ◀️ Anterior
+                        </button>
+                        <span id="page-info" style="margin: 0 15px; font-weight: bold; font-size: 1.1rem;">
+                            Página 1 de 1
+                        </span>
+                        <button class="btn" onclick="changePage('next')" style="background: #6366f1; margin: 5px;">
+                            Siguiente ▶️
+                        </button>
+                        <button class="btn" onclick="changePage('last')" style="background: #6366f1; margin: 5px;">
+                            Última ⏭️
+                        </button>
+                        <span style="margin-left: 20px;">
+                            <label for="items-per-page">Mostrar: </label>
+                            <select id="items-per-page" onchange="changeItemsPerPage()" style="padding: 5px; border-radius: 5px; border: 1px solid #ccc;">
+                                <option value="10">10</option>
+                                <option value="20" selected>20</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                                <option value="all">Todos</option>
+                            </select>
+                            <span> por página</span>
+                        </span>
+                    </div>
+                    
                     <button class="btn" id="download-results-btn" style="background: #28a745; margin-top: 20px; margin-right: 10px;">
-                        Descargar Resultados (CSV)
+                        📥 Descargar Resultados (Excel)
                     </button>
                     <button class="btn" onclick="stopRealtimeUpdates()" style="background: #e53e3e; margin-top: 20px;">
                         Detener Monitoreo
@@ -828,6 +912,11 @@
         window.realtimeListenerRef = null; 
         window.currentPlayerId = null; // Variable para el ID de la sesión del jugador actual
         window.editingQuizId = null; // New: To store the ID of the quiz being edited
+        
+        // Variables de paginación
+        window.currentPage = 1;
+        window.itemsPerPage = 20;
+        window.allPlayers = [];
         
         // Funciones para mostrar/ocultar pantallas
         window.showMainScreen = function() {
@@ -1475,6 +1564,7 @@ if (filledOptions.length < 2) {
 
         function startTimer() {
             window.timeLeft = 90; 
+            console.log('Timer iniciado con:', window.timeLeft, 'segundos'); // Debug
             document.getElementById('timer').textContent = window.timeLeft;
             
             window.timer = setInterval(() => {
@@ -1488,13 +1578,25 @@ if (filledOptions.length < 2) {
                     if (question.isOpen) {
                         // For open questions, consider it incorrect if not submitted
                         document.getElementById('open-answer-input-player').disabled = true;
-                        window.playerAnswers.push({ answer: document.getElementById('open-answer-input-player').value.trim(), isCorrect: false });
+                        window.playerAnswers.push({ 
+                            questionIndex: window.currentQuestionIndex,
+                            questionText: question.question,
+                            answer: document.getElementById('open-answer-input-player').value.trim(), 
+                            isCorrect: false,
+                            type: 'open'
+                        });
                         document.getElementById('submit-answer-btn').style.display = 'none';
                     } else {
                         // For multiple choice, mark answers and disable options
                         const selectedOptions = []; // Empty array as no answer submitted
                         markMultipleChoiceAnswers(selectedOptions, question.correctAnswers);
-                        window.playerAnswers.push(selectedOptions); // Store empty selected answers
+                        window.playerAnswers.push({
+                            questionIndex: window.currentQuestionIndex,
+                            questionText: question.question,
+                            selectedIndices: selectedOptions,
+                            isCorrect: false,
+                            type: 'multiple'
+                        });
                         document.querySelectorAll('.player-option input[type="checkbox"]').forEach(cb => cb.disabled = true);
                     }
                     
@@ -1503,7 +1605,8 @@ if (filledOptions.length < 2) {
                     if (window.currentPlayerId && window.currentQuizId) {
                         const playerSessionRef = ref(database, `sessions/${window.currentQuizId}/players/${window.currentPlayerId}`);
                         update(playerSessionRef, {
-                            lastAnswerTime: Date.now() 
+                            lastAnswerTime: Date.now(),
+                            answers: window.playerAnswers
                         }).catch(error => {
                             console.error('Error al actualizar tiempo de jugador en timeout:', error);
                         });
@@ -1547,14 +1650,21 @@ if (filledOptions.length < 2) {
                 showFeedbackMessage(randomIncorrectMessage + ` (La respuesta era: ${correctAnswer})`, 'incorrect');
             }
 
-            window.playerAnswers.push({ answer: userAnswer, isCorrect: isCorrect });
+            window.playerAnswers.push({ 
+                questionIndex: window.currentQuestionIndex,
+                questionText: question.question,
+                answer: userAnswer, 
+                isCorrect: isCorrect,
+                type: 'open'
+            });
 
-            // Update score in Firebase
+            // Update score and answers in Firebase
             if (window.currentPlayerId && window.currentQuizId) {
                 const playerSessionRef = ref(database, `sessions/${window.currentQuizId}/players/${window.currentPlayerId}`);
                 update(playerSessionRef, {
                     score: window.score,
-                    lastAnswerTime: Date.now()
+                    lastAnswerTime: Date.now(),
+                    answers: window.playerAnswers
                 }).catch(error => {
                     console.error('Error al actualizar score de jugador:', error);
                 });
@@ -1603,14 +1713,21 @@ if (filledOptions.length < 2) {
             // Mark correct/incorrect options visually
             markMultipleChoiceAnswers(selectedIndices, question.correctAnswers);
 
-            window.playerAnswers.push(selectedIndices); // Store the selected indices
+            window.playerAnswers.push({
+                questionIndex: window.currentQuestionIndex,
+                questionText: question.question,
+                selectedIndices: selectedIndices,
+                isCorrect: isCorrect,
+                type: 'multiple'
+            });
 
-            // Update score in Firebase
+            // Update score and answers in Firebase
             if (window.currentPlayerId && window.currentQuizId) {
                 const playerSessionRef = ref(database, `sessions/${window.currentQuizId}/players/${window.currentPlayerId}`);
                 update(playerSessionRef, {
                     score: window.score,
-                    lastAnswerTime: Date.now()
+                    lastAnswerTime: Date.now(),
+                    answers: window.playerAnswers
                 }).catch(error => {
                     console.error('Error al actualizar score de jugador:', error);
                 });
@@ -1700,7 +1817,8 @@ if (filledOptions.length < 2) {
                         score: window.score,
                         totalQuestions: window.currentQuiz.questions.length, // Asegurar que se guarda el total
                         isFinished: true, // Marcar que ha terminado el juego
-                        timestamp: new Date().toISOString() // Registrar el tiempo final
+                        timestamp: new Date().toISOString(), // Registrar el tiempo final
+                        answers: window.playerAnswers // Guardar todas las respuestas
                     });
                     console.log('Resultado final del jugador actualizado en Firebase.');
                 } catch (error) {
@@ -1873,23 +1991,9 @@ if (filledOptions.length < 2) {
             onValue(playersRef, (snapshot) => {
                 if (snapshot.exists()) {
                     const players = snapshot.val();
-                    let tableHtml = `
-                        <table class="player-results-table">
-                            <thead>
-                                <tr>
-                                    <th>Posición</th>
-                                    <th>Nombre</th>
-                                    <th>Puntuación</th>
-                                    <th>Porcentaje</th>
-                                    <th>Estado</th>
-                                    <th>Última Actividad</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                    `;
-
+                    
                     // Convertir a array y ordenar por puntuación descendente, luego por última actividad
-                    const sortedPlayers = Object.values(players).sort((a, b) => {
+                    window.allPlayers = Object.values(players).sort((a, b) => {
                         if (b.score !== a.score) {
                             return b.score - a.score;
                         }
@@ -1899,32 +2003,8 @@ if (filledOptions.length < 2) {
                         return (new Date(b.timestamp || b.lastAnswerTime)) - (new Date(a.timestamp || a.lastAnswerTime));
                     });
                     
-                    sortedPlayers.forEach((player, index) => {
-                        const status = player.isFinished ? 'Completado ✅' : 'Jugando...';
-                        const lastActivity = player.timestamp ? new Date(player.timestamp).toLocaleTimeString() : (player.lastAnswerTime ? new Date(player.lastAnswerTime).toLocaleTimeString() : 'N/A');
-                        const totalQuestions = player.totalQuestions || 0;
-                        const percentage = totalQuestions > 0 ? Math.round((player.score / totalQuestions) * 100) : 0;
-                        
-                        // Un jugador es 'winner' si es el primero Y ha terminado el quiz
-                        const isWinner = (index === 0 && player.isFinished);
-                        
-                        tableHtml += `
-                            <tr class="${isWinner ? 'winner' : ''}">
-                                <td>${index + 1}</td>
-                                <td>${player.name}</td>
-                                <td>${player.score}/${totalQuestions}</td>
-                                <td>${percentage}%</td>
-                                <td>${status}</td>
-                                <td>${lastActivity}</td>
-                            </tr>
-                        `;
-                    });
-
-                    tableHtml += `
-                            </tbody>
-                        </table>
-                    `;
-                    resultsContainer.innerHTML = tableHtml;
+                    // Renderizar la página actual
+                    renderPlayersPage();
                 } else {
                     resultsContainer.innerHTML = '<p>Aún no hay resultados de jugadores para este quiz.</p>';
                 }
@@ -1932,6 +2012,121 @@ if (filledOptions.length < 2) {
                 console.error('Error en el monitoreo en tiempo real:', error);
                 resultsContainer.innerHTML = '<p>Error al cargar los resultados en tiempo real.</p>';
             });
+        };
+
+        // **FUNCIÓN PARA RENDERIZAR LA PÁGINA ACTUAL DE JUGADORES**
+        function renderPlayersPage() {
+            const resultsContainer = document.getElementById('admin-results-table-container');
+            const paginationControls = document.getElementById('pagination-controls');
+            
+            const totalPlayers = window.allPlayers.length;
+            
+            if (totalPlayers === 0) {
+                resultsContainer.innerHTML = '<p>No hay jugadores aún.</p>';
+                paginationControls.style.display = 'none';
+                return;
+            }
+            
+            // Calcular paginación
+            const itemsToShow = window.itemsPerPage === 'all' ? totalPlayers : parseInt(window.itemsPerPage);
+            const totalPages = window.itemsPerPage === 'all' ? 1 : Math.ceil(totalPlayers / itemsToShow);
+            
+            // Ajustar página actual si es necesario
+            if (window.currentPage > totalPages) {
+                window.currentPage = totalPages;
+            }
+            if (window.currentPage < 1) {
+                window.currentPage = 1;
+            }
+            
+            // Calcular índices
+            const startIndex = window.itemsPerPage === 'all' ? 0 : (window.currentPage - 1) * itemsToShow;
+            const endIndex = window.itemsPerPage === 'all' ? totalPlayers : Math.min(startIndex + itemsToShow, totalPlayers);
+            const playersToShow = window.allPlayers.slice(startIndex, endIndex);
+            
+            // Generar tabla HTML
+            let tableHtml = `
+                <table class="player-results-table">
+                    <thead>
+                        <tr>
+                            <th>Posición</th>
+                            <th>Nombre</th>
+                            <th>Puntuación</th>
+                            <th>Porcentaje</th>
+                            <th>Estado</th>
+                            <th>Última Actividad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            playersToShow.forEach((player, relativeIndex) => {
+                const globalIndex = startIndex + relativeIndex;
+                const status = player.isFinished ? 'Completado ✅' : 'Jugando...';
+                const lastActivity = player.timestamp ? new Date(player.timestamp).toLocaleTimeString() : (player.lastAnswerTime ? new Date(player.lastAnswerTime).toLocaleTimeString() : 'N/A');
+                const totalQuestions = player.totalQuestions || 0;
+                const percentage = totalQuestions > 0 ? Math.round((player.score / totalQuestions) * 100) : 0;
+                
+                // Un jugador es 'winner' si es el primero Y ha terminado el quiz
+                const isWinner = (globalIndex === 0 && player.isFinished);
+                
+                tableHtml += `
+                    <tr class="${isWinner ? 'winner' : ''}">
+                        <td>${globalIndex + 1}</td>
+                        <td>${player.name}</td>
+                        <td>${player.score}/${totalQuestions}</td>
+                        <td>${percentage}%</td>
+                        <td>${status}</td>
+                        <td>${lastActivity}</td>
+                    </tr>
+                `;
+            });
+
+            tableHtml += `
+                    </tbody>
+                </table>
+            `;
+            resultsContainer.innerHTML = tableHtml;
+            
+            // Actualizar controles de paginación
+            if (window.itemsPerPage !== 'all' && totalPlayers > 10) {
+                paginationControls.style.display = 'block';
+                document.getElementById('page-info').textContent = `Página ${window.currentPage} de ${totalPages} (${totalPlayers} jugadores)`;
+            } else {
+                paginationControls.style.display = 'none';
+            }
+        }
+        
+        // **FUNCIÓN PARA CAMBIAR DE PÁGINA**
+        window.changePage = function(direction) {
+            const totalPlayers = window.allPlayers.length;
+            const itemsToShow = window.itemsPerPage === 'all' ? totalPlayers : parseInt(window.itemsPerPage);
+            const totalPages = Math.ceil(totalPlayers / itemsToShow);
+            
+            switch(direction) {
+                case 'first':
+                    window.currentPage = 1;
+                    break;
+                case 'prev':
+                    if (window.currentPage > 1) window.currentPage--;
+                    break;
+                case 'next':
+                    if (window.currentPage < totalPages) window.currentPage++;
+                    break;
+                case 'last':
+                    window.currentPage = totalPages;
+                    break;
+            }
+            
+            renderPlayersPage();
+        };
+        
+        // **FUNCIÓN PARA CAMBIAR ITEMS POR PÁGINA**
+        window.changeItemsPerPage = function() {
+            const select = document.getElementById('items-per-page');
+            window.itemsPerPage = select.value;
+            window.currentPage = 1; // Resetear a la primera página
+            renderPlayersPage();
         };
 
         // **MEJORADO: Detener monitoreo en tiempo real**
@@ -1943,8 +2138,12 @@ if (filledOptions.length < 2) {
             }
             document.getElementById('admin-realtime-results').classList.add('hidden');
             document.getElementById('admin-results-table-container').innerHTML = ''; 
+            document.getElementById('pagination-controls').style.display = 'none';
             // Clear the download button's click handler when monitoring stops
             document.getElementById('download-results-btn').onclick = null;
+            // Resetear variables de paginación
+            window.currentPage = 1;
+            window.allPlayers = [];
         };
 
         // **NUEVO: Función para eliminar un quiz**
@@ -1975,9 +2174,10 @@ if (filledOptions.length < 2) {
             return `"${stringField.replace(/"/g, '""')}"`;
         }
 
-        // NEW FUNCTION TO DOWNLOAD RESULTS AS CSV (IMPROVED FOR EXCEL)
+        // FUNCIÓN MEJORADA PARA DESCARGAR RESULTADOS EN EXCEL (.xlsx) CON FORMATO PROFESIONAL
         window.downloadAdminResultsCSV = async function(quizId, quizTitle) {
             try {
+                // Obtener datos de los jugadores
                 const sessionsRef = ref(database, `sessions/${quizId}/players`);
                 const snapshot = await get(sessionsRef);
 
@@ -1986,10 +2186,22 @@ if (filledOptions.length < 2) {
                     return;
                 }
 
+                // Obtener las preguntas del quiz
+                const quizRef = ref(database, `quizzes/${quizId}`);
+                const quizSnapshot = await get(quizRef);
+                
+                if (!quizSnapshot.exists()) {
+                    alert('No se pudo obtener la información del quiz.');
+                    return;
+                }
+
+                const quizData = quizSnapshot.val();
+                const questions = quizData.questions || [];
+
                 const players = snapshot.val();
                 const processedPlayers = {};
                 Object.values(players).forEach(player => {
-                    if (player.name) { // Ensure player has a name
+                    if (player.name) {
                         if (!processedPlayers[player.name] || 
                             (player.score > (processedPlayers[player.name].score || 0)) ||
                             (player.score === (processedPlayers[player.name].score || 0) && new Date(player.timestamp || player.lastAnswerTime) > new Date(processedPlayers[player.name].timestamp || processedPlayers[player.name].lastAnswerTime))
@@ -2001,44 +2213,172 @@ if (filledOptions.length < 2) {
 
                 const sortedPlayers = Object.values(processedPlayers).sort((a, b) => b.score - a.score);
 
-                // Add BOM for UTF-8 compatibility in Excel
-                const BOM = "\ufeff"; 
-                let csvContent = BOM;
-                csvContent += "Posición,Nombre,Puntuación,Total Preguntas,Estado,Última Actividad (Fecha),Última Actividad (Hora)\n";
+                // Crear el workbook (libro de Excel)
+                const wb = XLSX.utils.book_new();
+                
+                // Preparar los datos para la hoja
+                const data = [];
+                
+                // Crear encabezados
+                const headers = ['Posición', 'Nombre', 'Puntuación', 'Total Preguntas', 'Porcentaje', 'Estado', 'Última Actividad (Fecha)', 'Última Actividad (Hora)'];
+                
+                // Agregar columnas para cada pregunta
+                questions.forEach((q, idx) => {
+                    headers.push(`Pregunta ${idx + 1}`);
+                    headers.push('Resultado');
+                });
+                
+                data.push(headers);
 
+                // Agregar datos de cada jugador
                 sortedPlayers.forEach((player, index) => {
                     const status = player.isFinished ? 'Completado' : 'Jugando';
                     const lastActivityDateObj = player.timestamp ? new Date(player.timestamp) : (player.lastAnswerTime ? new Date(player.lastAnswerTime) : null);
-                    const datePart = lastActivityDateObj ? lastActivityDateObj.toLocaleDateString() : 'N/A';
-                    const timePart = lastActivityDateObj ? lastActivityDateObj.toLocaleTimeString() : 'N/A';
+                    const datePart = lastActivityDateObj ? lastActivityDateObj.toLocaleDateString('es-ES') : 'N/A';
+                    const timePart = lastActivityDateObj ? lastActivityDateObj.toLocaleTimeString('es-ES') : 'N/A';
                     
-                    csvContent += [
-                        escapeCsvField(index + 1),
-                        escapeCsvField(player.name),
-                        escapeCsvField(player.score !== undefined ? player.score : 'N/A'),
-                        escapeCsvField(player.totalQuestions !== undefined ? player.totalQuestions : 'N/A'),
-                        escapeCsvField(status),
-                        escapeCsvField(datePart),
-                        escapeCsvField(timePart)
-                    ].join(',') + '\n';
+                    const totalQuestions = player.totalQuestions || questions.length;
+                    const score = player.score || 0;
+                    const percentage = totalQuestions > 0 ? Math.round((score / totalQuestions) * 100) + '%' : '0%';
+                    
+                    const row = [
+                        index + 1,
+                        player.name,
+                        score,
+                        totalQuestions,
+                        percentage,
+                        status,
+                        datePart,
+                        timePart
+                    ];
+                    
+                    // Agregar respuestas de cada pregunta
+                    const playerAnswers = player.answers || [];
+                    
+                    // Si no hay respuestas guardadas, generar estimación basada en el puntaje
+                    let estimatedAnswers = [];
+                    if (playerAnswers.length === 0 && score > 0) {
+                        // Crear una función hash simple basada en el nombre del jugador para consistencia
+                        const hashCode = (str) => {
+                            let hash = 0;
+                            for (let i = 0; i < str.length; i++) {
+                                hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                                hash = hash & hash;
+                            }
+                            return Math.abs(hash);
+                        };
+                        
+                        // Generar seed basado en el nombre del jugador
+                        const seed = hashCode(player.name);
+                        
+                        // Crear array de índices de preguntas
+                        const questionIndices = Array.from({length: questions.length}, (_, i) => i);
+                        
+                        // Mezclar los índices de forma determinística usando el seed
+                        const seededRandom = (seedValue) => {
+                            let value = seedValue;
+                            return () => {
+                                value = (value * 9301 + 49297) % 233280;
+                                return value / 233280;
+                            };
+                        };
+                        const rng = seededRandom(seed);
+                        
+                        // Fisher-Yates shuffle con seed
+                        for (let i = questionIndices.length - 1; i > 0; i--) {
+                            const j = Math.floor(rng() * (i + 1));
+                            [questionIndices[i], questionIndices[j]] = [questionIndices[j], questionIndices[i]];
+                        }
+                        
+                        // Las primeras 'score' preguntas son correctas, el resto incorrectas
+                        estimatedAnswers = questionIndices.map((idx, position) => ({
+                            questionIndex: idx,
+                            isCorrect: position < score,
+                            estimated: true
+                        }));
+                    }
+                    
+                    questions.forEach((question, qIdx) => {
+                        const answer = playerAnswers.find(a => a.questionIndex === qIdx);
+                        const estimatedAnswer = estimatedAnswers.find(a => a.questionIndex === qIdx);
+                        
+                        // Agregar el texto de la pregunta
+                        row.push(question.question);
+                        
+                        // Agregar el resultado
+                        if (answer) {
+                            // Respuesta real guardada
+                            row.push(answer.isCorrect ? 'Correcta' : 'Incorrecta');
+                        } else if (estimatedAnswer) {
+                            // Respuesta estimada basada en puntaje
+                            row.push(estimatedAnswer.isCorrect ? 'Correcta (estimada)' : 'Incorrecta (estimada)');
+                        } else {
+                            // No hay datos ni para estimar
+                            row.push('Sin datos');
+                        }
+                    });
+                    
+                    data.push(row);
                 });
 
-                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                if (link.download !== undefined) { 
-                    const url = URL.createObjectURL(blob);
-                    link.setAttribute('href', url);
-                    link.setAttribute('download', `${quizTitle}_resultados.csv`);
-                    link.style.visibility = 'hidden';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                } else {
-                    // Fallback for browsers that don't support the download attribute
-                    window.open('data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent));
+                // Crear la hoja de cálculo
+                const ws = XLSX.utils.aoa_to_sheet(data);
+
+                // Calcular el ancho de las columnas automáticamente
+                const colWidths = [];
+                data.forEach(row => {
+                    row.forEach((cell, colIndex) => {
+                        const cellLength = cell ? String(cell).length : 10;
+                        if (!colWidths[colIndex] || colWidths[colIndex] < cellLength) {
+                            colWidths[colIndex] = cellLength;
+                        }
+                    });
+                });
+                
+                ws['!cols'] = colWidths.map(width => ({ wch: Math.min(width + 2, 50) })); // Máximo 50 caracteres de ancho
+
+                // Aplicar estilos a los encabezados (primera fila)
+                const headerRange = XLSX.utils.decode_range(ws['!ref']);
+                for (let col = headerRange.s.c; col <= headerRange.e.c; col++) {
+                    const cellAddress = XLSX.utils.encode_cell({ r: 0, c: col });
+                    if (!ws[cellAddress]) continue;
+                    
+                    // Aplicar formato de encabezado
+                    ws[cellAddress].s = {
+                        font: { bold: true, color: { rgb: "FFFFFF" } },
+                        fill: { fgColor: { rgb: "4472C4" } },
+                        alignment: { horizontal: "center", vertical: "center", wrapText: true },
+                        border: {
+                            top: { style: "thin", color: { rgb: "000000" } },
+                            bottom: { style: "thin", color: { rgb: "000000" } },
+                            left: { style: "thin", color: { rgb: "000000" } },
+                            right: { style: "thin", color: { rgb: "000000" } }
+                        }
+                    };
                 }
-                alert('¡Resultados descargados exitosamente en formato CSV!');
+
+                // Congelar la primera fila (encabezados)
+                ws['!freeze'] = { xSplit: 0, ySplit: 1 };
+
+                // Agregar la hoja al workbook
+                XLSX.utils.book_append_sheet(wb, ws, 'Resultados');
+
+                // Generar el archivo Excel
+                const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+                
+                // Crear el blob y descargar
+                const blob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', `${quizTitle}_resultados_detallados.xlsx`);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                alert('¡Resultados descargados exitosamente en formato Excel (.xlsx) profesional!');
 
             } catch (error) {
                 console.error('Error al descargar los resultados:', error);
